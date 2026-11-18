@@ -1,0 +1,9 @@
+{
+  "name": "the-lab-ai-tracker",
+  "private": true,
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
