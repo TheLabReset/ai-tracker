@@ -20,10 +20,7 @@ Las marcas conocidas solo ayudan a reconocer nombres y alias: incluye también l
 
 const colacion = new Intl.Collator('es');
 
-/**
- * Arma los mensajes para el modelo lector. El catálogo se ordena alfabéticamente, así que el orden
- * en que llega no delata a ninguna marca, y la entrada no tiene forma de indicar cuál es la cliente.
- */
+/** Mensajes para el lector, con el catálogo en orden alfabético. */
 export function construirMensajesLector(e: EntradaLector): { sistema: string; usuario: string } {
   const marcas_conocidas = e.catalogo
     .map((m) => ({ nombre: m.nombre, alias: [...m.alias].sort(colacion.compare) }))

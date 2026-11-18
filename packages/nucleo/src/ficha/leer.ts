@@ -109,10 +109,7 @@ function leerPanel(ws: XLSX.WorkSheet): PanelFicha {
   };
 }
 
-/**
- * Lee una ficha de seguimiento GEO (.xlsx) con los valores que guardó el archivo; no recalcula
- * fórmulas. Las fechas quedan como número de serie de Excel.
- */
+/** Lee la ficha .xlsx con los valores guardados, sin recalcular fórmulas. */
 export function leerFicha(contenido: Uint8Array): FichaCruda {
   let wb: XLSX.WorkBook;
   try {

@@ -65,10 +65,7 @@ const MEDIDAS_PANEL: Array<keyof IndicadoresPanelVuelta> = [
 
 const redondear = (v: number | null, d: number) => (v === null ? null : redondearExcel(v, d));
 
-/**
- * Compara los indicadores de lo importado ("Como en el Excel") con el Panel de la ficha, vuelta por
- * vuelta (§5.6, "Verificación"). Cada diferencia lleva las anomalías de su vuelta que la explican.
- */
+/** Compara lo importado con el Panel de la ficha, vuelta por vuelta. */
 export function verificarContraPanel(
   ficha: FichaCruda,
   resultado: ResultadoImportacion,

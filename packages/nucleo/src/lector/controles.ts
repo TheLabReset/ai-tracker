@@ -9,10 +9,7 @@ export interface Duda {
   detalle: string;
 }
 
-/**
- * Controles de confianza deterministas (§5.4, paso 6). Una respuesta con alguna duda va a la cola
- * de Revisión. El control de salto solo corre si se pasa la posición de la vuelta anterior.
- */
+/** Controles de confianza deterministas; cada duda manda la respuesta a revisión. */
 export function controlarLectura(p: {
   respuesta: string;
   menciones: Mencion[];

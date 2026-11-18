@@ -14,10 +14,7 @@ export function etiquetaDesdeRespuesta(r: Respuesta, marcaId: string): EtiquetaO
   return { respuestaId: r.id, marcaId, nombra: e.nombra, puesto: e.puesto };
 }
 
-/**
- * Acuerdo entre dos juegos de etiquetas (persona vs persona, o lector vs set de oro), en % sobre
- * los pares (respuesta, marca) presentes en ambos. Meta de F0: ≥ 95 % en "nombra" (§5.4).
- */
+/** Porcentaje de acuerdo entre dos juegos de etiquetas. */
 export function medirAcuerdo(a: EtiquetaOro[], b: EtiquetaOro[]): { pares: number; nombra: number | null; puesto: number | null } {
   const clave = (x: EtiquetaOro) => `${x.respuestaId}\u0000${x.marcaId}`;
   const deB = new Map(b.map((x) => [clave(x), x]));

@@ -57,11 +57,7 @@ function ganaComparacion(r: Respuesta, marcaId: string, e: Evaluacion): boolean 
   return e.posicion !== null && (rival === null || e.posicion < rival);
 }
 
-/**
- * Calcula una medida para una marca sobre un conjunto de respuestas (§5.5). Cada respuesta pesa lo
- * que pesa su motor; un motor ausente simplemente no suma. Para marcas que no son cliente solo
- * cuentan las respuestas automáticas (las importadas no traen la posición de los competidores).
- */
+/** Calcula una medida para una marca, ponderando cada respuesta por su motor. */
 export function medir(medida: Medida, respuestas: Respuesta[], marcaId: string, op: OpcionesMedida): ResultadoMedida {
   const base = respuestas.filter((r) => r.valida && (op.esCliente || r.origen === 'auto'));
   const peso = (r: Respuesta) => op.pesosMotor?.[r.motor] ?? 1;
@@ -86,7 +82,7 @@ export function medir(medida: Medida, respuestas: Respuesta[], marcaId: string, 
         }),
       );
     case 'posicion_media':
-      // Lo importado no trae la posición exacta de "Más abajo": promediarlo sesgaría hacia arriba.
+      // Solo respuestas automáticas: lo importado no trae la posición exacta.
       return agregar(
         base.filter((r) => r.origen === 'auto').flatMap((r) => {
           const posicion = evaluar(r).posicion;
@@ -107,7 +103,7 @@ export function medir(medida: Medida, respuestas: Respuesta[], marcaId: string, 
       let numerador = 0;
       let denominador = 0;
       let exitos = 0;
-      // La columna libre de la ficha solo anota a quienes van antes que nosotros: no sirve para SoV.
+      // Solo respuestas automáticas: la columna libre de la ficha no sirve para SoV.
       const automaticas = base.filter((r) => r.origen === 'auto');
       for (const r of automaticas) {
         const propia = evaluar(r).nombra;

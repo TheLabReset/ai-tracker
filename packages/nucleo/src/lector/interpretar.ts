@@ -8,10 +8,7 @@ interface Grupo {
   lugarEnLista: number | null;
 }
 
-/**
- * Convierte la lectura en menciones normalizadas (§5.4, pasos 2 y 3): une los alias de una misma
- * marca, deja las desconocidas como descubiertas (también ocupan su lugar) y numera las recomendadas.
- */
+/** Convierte la lectura en menciones normalizadas con su posición. */
 export function interpretarLectura(lectura: Lectura, catalogo: MarcaCatalogo[]): Mencion[] {
   const grupos = new Map<string, Grupo>();
   for (const leida of [...lectura.marcas].sort((a, b) => a.orden - b.orden)) {

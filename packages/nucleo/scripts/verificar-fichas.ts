@@ -1,12 +1,4 @@
-/**
- * Verifica una carpeta de fichas GEO (.xlsx) e imprime una línea por ficha:
- *   - si el Panel recalculado es idéntico al guardado ("fiel"),
- *   - cuántas anomalías hay de cada tipo,
- *   - si los indicadores importados cuadran con el Panel, sin correcciones y con todas las propuestas.
- * Con --salida <carpeta> escribe <archivo>.anomalias.csv: el informe de calidad fila por fila (F0).
- *
- * Uso: pnpm -C packages/nucleo verificar-fichas <carpeta> [--salida <carpeta>]
- */
+// Uso: pnpm -C packages/nucleo verificar-fichas <carpeta> [--salida <carpeta>]
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';

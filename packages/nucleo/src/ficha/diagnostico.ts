@@ -45,10 +45,7 @@ function vueltaNumerica(v: ValorCelda): number | null {
   return typeof v === 'number' && Number.isInteger(v) && v > 0 ? v : null;
 }
 
-/**
- * El texto de la columna K ("Estado de la fila") calculado sobre los valores crudos, como la
- * fórmula de la ficha. null = la fila está completa o la ficha la considera vacía.
- */
+/** Estado de la fila como la columna K de la ficha; null si está completa. */
 export function estadoDeFila(f: FilaCruda): string | null {
   if ([f.vuelta, f.pregunta, f.ia, f.nombra].every(vacia)) return null;
   if (vacia(f.vuelta) || vacia(f.pregunta) || vacia(f.ia)) return 'Falta vuelta, pregunta o IA';
@@ -76,10 +73,7 @@ function proponerVuelta(f: FilaCruda, filas: FilaCruda[]): number | null {
   return Math.max(...numeradas.map((x) => x.vuelta as number)) + 1;
 }
 
-/**
- * Informe de calidad de una ficha (§5.6, "Limpieza asistida"): cada problema con una corrección
- * propuesta cuando la hay. No corrige nada; las correcciones se aplican solo si se aceptan.
- */
+/** Informe de calidad de la ficha; propone correcciones, no las aplica. */
 export function diagnosticarFicha(ficha: FichaCruda): Anomalia[] {
   const { filas } = ficha;
   const anomalias: Anomalia[] = [];
@@ -230,11 +224,7 @@ function mismoValor(a: ValorCelda, b: ValorCelda): boolean {
   return a === b;
 }
 
-/**
- * Aplica solo las correcciones aceptadas, sobre una copia de las filas. Una corrección se aplica
- * solo si la celda todavía tiene el valor que se propuso corregir (`de`): si la ficha cambió
- * después de aceptarla, la corrección queda sin efecto en vez de pisar el dato nuevo.
- */
+/** Aplica las correcciones aceptadas solo si la celda sigue valiendo `de`. */
 export function aplicarCorrecciones(filas: FilaCruda[], aceptadas: Correccion[]): FilaCruda[] {
   const porFila = new Map<number, Correccion[]>();
   for (const c of aceptadas) porFila.set(c.fila, [...(porFila.get(c.fila) ?? []), c]);

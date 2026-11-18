@@ -19,10 +19,7 @@ export interface ValorIndicador {
 
 export type ResultadoIndicador = { aplica: true; valores: ValorIndicador[] } | { aplica: false; motivo: 'solo_cliente' };
 
-/**
- * Calcula un indicador para una marca, vuelta por vuelta, con la misma definición para cualquier
- * marca del sector (§5.5.1). Para marcas que no son cliente solo usa respuestas automáticas.
- */
+/** Calcula un indicador para una marca, vuelta por vuelta. */
 export function calcularIndicador(
   def: DefinicionIndicador,
   respuestas: Respuesta[],
@@ -55,7 +52,7 @@ export function calcularIndicador(
       }
     });
   }
-  // Orden estable por vuelta: en una misma vuelta, lo importado va antes que lo automático.
+  // En una misma vuelta, lo importado va antes que lo automático.
   valores.sort((a, b) => a.vuelta - b.vuelta);
   return { aplica: true, valores };
 }

@@ -20,10 +20,7 @@ const SINONIMOS_FUENTE: Record<string, string> = {
 
 const PUESTO_NUMERICO = /^\s*([123])\s*(º|°|o|ro|do|er|\.)?\s*$/i;
 
-/**
- * Lleva un valor de la ficha a su forma canónica. `exacto` es true solo si el valor ya estaba
- * bien escrito (o vacío). Lo que no tiene equivalente se propone vaciar (`valor: null`).
- */
+/** Lleva un valor de la ficha a su forma canónica. */
 export function canonizar(columna: ColumnaLista, valor: ValorCelda): { valor: string | null; exacto: boolean } {
   if (valor === null || valor === '') return { valor: null, exacto: true };
   const lista = LISTAS[columna];

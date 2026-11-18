@@ -3,10 +3,7 @@ import { MEDIDAS } from '../metricas/medidas';
 
 const MedidaSchema = z.enum(MEDIDAS);
 
-/**
- * Un indicador es una definición de cuatro piezas (preguntas × motores × medida × periodo) que se
- * aplica igual a todas las marcas (§5.5.1). Cambiar una definición es publicar una versión nueva.
- */
+/** Definición de un indicador: preguntas, motores, medidas y periodo. */
 export const DefinicionIndicadorSchema = z.object({
   id: z.string().min(1),
   version: z.number().int().positive(),

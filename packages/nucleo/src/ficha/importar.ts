@@ -53,10 +53,7 @@ function proponerDatos(d: FichaCruda['datos']): FichaCruda['datos'] {
   return { categoria: d.categoria.trim().toLocaleLowerCase('es'), marca: aTitulo(d.marca), competidor: aTitulo(d.competidor) };
 }
 
-/**
- * Convierte una ficha en respuestas importadas (§5.6), aplicando solo las correcciones aceptadas.
- * La historia conserva la clasificación tal como la hizo cada equipo.
- */
+/** Convierte la ficha en respuestas importadas con las correcciones aceptadas. */
 export function importarFicha(ficha: FichaCruda, op: OpcionesImportacion): ResultadoImportacion {
   const filas = aplicarCorrecciones(ficha.filas, op.aceptadas);
 
