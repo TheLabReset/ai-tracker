@@ -11,3 +11,4 @@ export * from './lector/mensajes';
 export * from './lector/interpretar';
 export * from './lector/controles';
 export * from './evaluacion';
+export * from './lector/acuerdo';
