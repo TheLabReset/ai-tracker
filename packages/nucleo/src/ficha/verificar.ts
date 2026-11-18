@@ -3,7 +3,7 @@ import { calcularIndicador, type ValorIndicador } from '../indicadores/calcular'
 import { indicadorInicial } from '../indicadores/catalogo';
 import type { Medida } from '../metricas/medidas';
 import { redondearExcel } from '../metricas/redondeo';
-import type { Anomalia, TipoAnomalia } from './diagnostico';
+import type { Anomalia, ColumnaRegistro } from './diagnostico';
 import type { ResultadoImportacion } from './importar';
 import type { FichaCruda, IndicadoresPanelVuelta } from './leer';
 
@@ -20,7 +20,36 @@ export interface ResultadoVerificacion {
   diferencias: DiferenciaPanel[];
 }
 
-const EXPLICAN: ReadonlySet<TipoAnomalia> = new Set(['valor_fuera_de_lista', 'puesto_con_no', 'vuelta_sin_numero', 'fila_incompleta']);
+/** Las columnas de la ficha de las que depende cada cifra del Panel. */
+const COLUMNAS_DE: Record<DiferenciaPanel['medida'], ColumnaRegistro[]> = {
+  ultimaVuelta: [],
+  respuestas: [],
+  nombraVeces: ['nombra'],
+  nombraPct: ['nombra'],
+  primeroVeces: ['puesto'],
+  primeroPct: ['puesto'],
+  puntos: ['nombra', 'puesto'],
+  hablaBien: ['sentimiento'],
+  hablaMal: ['sentimiento'],
+  citaWeb: ['fuente'],
+  citaTerceros: ['fuente'],
+};
+const MEDIDAS_DE_PUESTO: ReadonlySet<DiferenciaPanel['medida']> = new Set(['primeroVeces', 'primeroPct']);
+
+/** Anomalías que sacan una fila del cálculo (o la meten): afectan a todas las cifras de su vuelta. */
+function cambiaLasFilas(a: Anomalia): boolean {
+  if (a.tipo === 'vuelta_sin_numero' || a.tipo === 'fuera_del_panel') return true;
+  if (a.tipo === 'fila_incompleta') return a.detalle === 'Falta vuelta, pregunta o IA' || a.detalle === 'Falta ¿nos nombra?';
+  return a.tipo === 'valor_fuera_de_lista' && a.columna !== null && ['vuelta', 'pregunta', 'ia', 'nombra'].includes(a.columna);
+}
+
+/** ¿Puede esta anomalía explicar una diferencia en esta cifra? */
+function explica(a: Anomalia, medida: DiferenciaPanel['medida']): boolean {
+  if (cambiaLasFilas(a)) return true;
+  if (a.tipo === 'valor_fuera_de_lista') return a.columna !== null && COLUMNAS_DE[medida].includes(a.columna);
+  if (a.tipo === 'puesto_con_no') return MEDIDAS_DE_PUESTO.has(medida);
+  return false;
+}
 const MEDIDAS_PANEL: Array<keyof IndicadoresPanelVuelta> = [
   'respuestas',
   'nombraVeces',
@@ -46,7 +75,8 @@ export function verificarContraPanel(
   anomalias: Anomalia[],
   op: { marcaClienteId: string; catalogo: MarcaCatalogo[] },
 ): ResultadoVerificacion {
-  const res = calcularIndicador(indicadorInicial('como-en-el-excel'), resultado.respuestas, { id: op.marcaClienteId, esCliente: true }, op.catalogo);
+  const importadas = resultado.respuestas.filter((r) => r.origen === 'importada');
+  const res = calcularIndicador(indicadorInicial('como-en-el-excel'), importadas, { id: op.marcaClienteId, esCliente: true }, op.catalogo);
   const porVuelta = new Map<number, Map<Medida, ValorIndicador>>();
   if (res.aplica) {
     for (const v of res.valores) {
@@ -73,8 +103,8 @@ export function verificarContraPanel(
       citaTerceros: de('cita_terceros')?.exitos ?? 0,
     };
   };
-  const explican = (...vueltas: Array<number | null>) =>
-    anomalias.filter((a) => EXPLICAN.has(a.tipo) && a.vuelta !== null && vueltas.includes(a.vuelta));
+  const explican = (medida: DiferenciaPanel['medida'], ...vueltas: Array<number | null>) =>
+    anomalias.filter((a) => a.vuelta !== null && vueltas.includes(a.vuelta) && explica(a, medida));
 
   const diferencias: DiferenciaPanel[] = [];
   for (let k = 1; k <= 6; k++) {
@@ -82,7 +112,7 @@ export function verificarContraPanel(
     const calculado = calcularVuelta(k);
     for (const medida of MEDIDAS_PANEL) {
       if (panel[medida] !== calculado[medida]) {
-        diferencias.push({ vuelta: k, medida, panel: panel[medida], calculado: calculado[medida], explicadaPor: explican(k) });
+        diferencias.push({ vuelta: k, medida, panel: panel[medida], calculado: calculado[medida], explicadaPor: explican(medida, k) });
       }
     }
   }
@@ -98,7 +128,7 @@ export function verificarContraPanel(
   ];
   for (const [medida, panel, calculado] of comparaciones) {
     if (panel !== calculado) {
-      diferencias.push({ vuelta: 'ultima', medida, panel, calculado, explicadaPor: explican(ultimaCalculada, ficha.panel.ultimaVuelta) });
+      diferencias.push({ vuelta: 'ultima', medida, panel, calculado, explicadaPor: explican(medida, ultimaCalculada, ficha.panel.ultimaVuelta) });
     }
   }
 

@@ -7,6 +7,8 @@ export interface ValorIndicador {
   version: number;
   marcaId: string;
   vuelta: number;
+  /** Lo importado del Excel y lo medido por la herramienta nunca se mezclan en un mismo valor. */
+  origen: Respuesta['origen'];
   /** null = todos los motores juntos. */
   motor: string | null;
   medida: Medida;
@@ -36,19 +38,24 @@ export function calcularIndicador(
     (r) => entra(r) && (pesosMotor === undefined || r.motor in pesosMotor) && (marca.esCliente || r.origen === 'auto'),
   );
 
-  const vueltas = [...new Set(filtradas.map((r) => r.vuelta))].sort((a, b) => a - b);
   const valores: ValorIndicador[] = [];
-  vueltas.forEach((vuelta, i) => {
-    const ventana = new Set(def.periodo.tipo === 'vuelta' ? [vuelta] : vueltas.slice(Math.max(0, i - def.periodo.n + 1), i + 1));
-    const enVentana = filtradas.filter((r) => ventana.has(r.vuelta));
-    const motores = def.desglosePorMotor ? [...new Set(enVentana.map((r) => r.motor))].sort() : [];
-    for (const motor of [null, ...motores]) {
-      const sub = motor === null ? enVentana : enVentana.filter((r) => r.motor === motor);
-      for (const medida of def.medidas) {
-        const res = medir(medida, sub, marca.id, { esCliente: marca.esCliente, catalogo, pesosMotor });
-        valores.push({ indicadorId: def.id, version: def.version, marcaId: marca.id, vuelta, motor, medida, ...res });
+  for (const origen of ['importada', 'auto'] as const) {
+    const delOrigen = filtradas.filter((r) => r.origen === origen);
+    const vueltas = [...new Set(delOrigen.map((r) => r.vuelta))].sort((a, b) => a - b);
+    vueltas.forEach((vuelta, i) => {
+      const ventana = new Set(def.periodo.tipo === 'vuelta' ? [vuelta] : vueltas.slice(Math.max(0, i - def.periodo.n + 1), i + 1));
+      const enVentana = delOrigen.filter((r) => ventana.has(r.vuelta));
+      const motores = def.desglosePorMotor ? [...new Set(enVentana.map((r) => r.motor))].sort() : [];
+      for (const motor of [null, ...motores]) {
+        const sub = motor === null ? enVentana : enVentana.filter((r) => r.motor === motor);
+        for (const medida of def.medidas) {
+          const res = medir(medida, sub, marca.id, { esCliente: marca.esCliente, catalogo, pesosMotor });
+          valores.push({ indicadorId: def.id, version: def.version, marcaId: marca.id, vuelta, origen, motor, medida, ...res });
+        }
       }
-    }
-  });
+    });
+  }
+  // Orden estable por vuelta: en una misma vuelta, lo importado va antes que lo automático.
+  valores.sort((a, b) => a.vuelta - b.vuelta);
   return { aplica: true, valores };
 }

@@ -47,6 +47,11 @@ describe('medir', () => {
     ];
     expect(medir('gana_comparacion', comp, 'pbs', op)).toMatchObject({ exitos: 2, respuestas: 3 });
   });
+  it('posición media y share of voice usan solo respuestas automáticas', () => {
+    const imp = respuesta({ origen: 'importada', registroCliente: { nombra: 'Sí', puesto: '1º', sentimiento: null, fuente: null } });
+    expect(medir('sov', [imp], 'pbs', op)).toEqual({ valor: null, exitos: 0, respuestas: 0 });
+    expect(medir('posicion_media', [imp], 'pbs', op)).toEqual({ valor: null, exitos: 0, respuestas: 0 });
+  });
 });
 
 describe('ruido', () => {

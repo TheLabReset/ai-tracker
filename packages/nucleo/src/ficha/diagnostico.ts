@@ -1,7 +1,7 @@
 import { fechaDeCelda, semanaDelControl } from '../calendario';
 import { CODIGOS_COMPAT, IAS_FICHA, type ValorCelda } from '../dominio';
 import { canonizar, type ColumnaLista } from '../valores';
-import type { FichaCruda, FilaCruda } from './leer';
+import { ULTIMA_FILA_DEL_PANEL, type FichaCruda, type FilaCruda } from './leer';
 
 export type TipoAnomalia =
   | 'valor_fuera_de_lista'
@@ -10,7 +10,8 @@ export type TipoAnomalia =
   | 'formula_rota'
   | 'puesto_con_no'
   | 'vuelta_distinta_de_semana'
-  | 'cobertura_incompleta';
+  | 'cobertura_incompleta'
+  | 'fuera_del_panel';
 
 export type ColumnaRegistro = 'vuelta' | 'pregunta' | 'ia' | 'nombra' | 'puesto' | 'sentimiento' | 'fuente' | 'puntos' | 'estado';
 
@@ -154,6 +155,18 @@ export function diagnosticarFicha(ficha: FichaCruda): Anomalia[] {
       });
     }
 
+    if (f.fila > ULTIMA_FILA_DEL_PANEL) {
+      anomalias.push({
+        tipo: 'fuera_del_panel',
+        fila: f.fila,
+        vuelta,
+        columna: null,
+        valor: null,
+        detalle: `La fila está después de la ${ULTIMA_FILA_DEL_PANEL}: se importa, pero el Panel de la ficha no la cuenta`,
+        correccion: null,
+      });
+    }
+
     const estado = estadoDeFila(f);
     if (estado) {
       anomalias.push({ tipo: 'fila_incompleta', fila: f.fila, vuelta, columna: null, valor: null, detalle: estado, correccion: null });
@@ -212,13 +225,22 @@ export function diagnosticarFicha(ficha: FichaCruda): Anomalia[] {
   return anomalias;
 }
 
-/** Aplica solo las correcciones aceptadas, sobre una copia de las filas. */
+function mismoValor(a: ValorCelda, b: ValorCelda): boolean {
+  if (esError(a) || esError(b)) return esError(a) && esError(b) && a.error === b.error;
+  return a === b;
+}
+
+/**
+ * Aplica solo las correcciones aceptadas, sobre una copia de las filas. Una corrección se aplica
+ * solo si la celda todavía tiene el valor que se propuso corregir (`de`): si la ficha cambió
+ * después de aceptarla, la corrección queda sin efecto en vez de pisar el dato nuevo.
+ */
 export function aplicarCorrecciones(filas: FilaCruda[], aceptadas: Correccion[]): FilaCruda[] {
   const porFila = new Map<number, Correccion[]>();
   for (const c of aceptadas) porFila.set(c.fila, [...(porFila.get(c.fila) ?? []), c]);
   return filas.map((f) => {
     const copia: FilaCruda = { ...f };
-    for (const c of porFila.get(f.fila) ?? []) copia[c.columna] = c.a;
+    for (const c of porFila.get(f.fila) ?? []) if (mismoValor(f[c.columna], c.de)) copia[c.columna] = c.a;
     return copia;
   });
 }

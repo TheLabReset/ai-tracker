@@ -74,6 +74,15 @@ describe('indicadores', () => {
       [2, 1.5],
     ]);
   });
+  it('no mezcla lo importado con lo automático de la misma vuelta', () => {
+    const imp = respuesta({ id: 'i', vuelta: 1, origen: 'importada', registroCliente: { nombra: 'No', puesto: null, sentimiento: null, fuente: null } });
+    const r = calcularIndicador(indicadorInicial('visibilidad-abierta'), [...rs, imp], cliente, catalogo);
+    const v1 = r.aplica ? r.valores.filter((v) => v.vuelta === 1 && v.medida === 'puntos' && v.motor === null) : [];
+    expect(v1.map((v) => [v.origen, v.valor])).toEqual([
+      ['importada', 0],
+      ['auto', 2.5],
+    ]);
+  });
   it('une preguntas por código y por tipo', () => {
     const def = {
       ...indicadorInicial('visibilidad-abierta'),

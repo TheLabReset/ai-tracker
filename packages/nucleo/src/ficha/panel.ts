@@ -1,6 +1,6 @@
 import type { ValorCelda } from '../dominio';
 import { redondearExcel } from '../metricas/redondeo';
-import type { FilaCruda, IndicadoresPanelVuelta, PanelFicha } from './leer';
+import { ULTIMA_FILA_DEL_PANEL, type FilaCruda, type IndicadoresPanelVuelta, type PanelFicha } from './leer';
 
 const vacia = (v: ValorCelda): boolean => v === null || v === '';
 
@@ -40,8 +40,9 @@ function indicadoresDe(filas: FilaCruda[]): IndicadoresPanelVuelta {
   };
 }
 
-/** Recalcula el Panel con las mismas fórmulas de la ficha, incluidas sus mañas. */
-export function panelComoExcel(filas: FilaCruda[]): PanelFicha {
+/** Recalcula el Panel con las mismas fórmulas de la ficha, incluidas sus mañas (y su límite de filas). */
+export function panelComoExcel(todas: FilaCruda[]): PanelFicha {
+  const filas = todas.filter((f) => f.fila <= ULTIMA_FILA_DEL_PANEL);
   const deVuelta = (k: number) => filas.filter((f) => f.vuelta === k);
   const vueltas = {} as PanelFicha['vueltas'];
   for (let k = 1; k <= 6; k++) vueltas[k as 1] = indicadoresDe(deVuelta(k));

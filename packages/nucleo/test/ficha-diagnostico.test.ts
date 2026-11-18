@@ -64,4 +64,8 @@ describe('aplicarCorrecciones', () => {
     expect(r[1]?.fuente).toBe('No Cita');
     expect(filas).toEqual(copia);
   });
+  it('no aplica una corrección si la celda ya no tiene el valor de origen', () => {
+    const filas = [fila(2, { nombra: 'No' })];
+    expect(aplicarCorrecciones(filas, [{ id: '2:nombra', fila: 2, columna: 'nombra', de: 'Si', a: 'Sí' }])[0]?.nombra).toBe('No');
+  });
 });

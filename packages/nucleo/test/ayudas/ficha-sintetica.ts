@@ -44,7 +44,7 @@ export function crearFichaSintetica(p: {
 
   const encabezado = [...ENCABEZADOS_REGISTRO] as string[];
   if (p.encabezadoRoto) encabezado[4] = '¿Nos menciona?';
-  const registro: XLSX.WorkSheet = { '!ref': 'A1:K401' };
+  const registro: XLSX.WorkSheet = { '!ref': `A1:K${Math.max(401, p.filas.length + 1)}` };
   encabezado.forEach((t, c) => poner(registro, XLSX.utils.encode_cell({ r: 0, c }), t));
   p.filas.forEach((fila, r) => fila.forEach((v, c) => poner(registro, XLSX.utils.encode_cell({ r: r + 1, c }), v)));
 

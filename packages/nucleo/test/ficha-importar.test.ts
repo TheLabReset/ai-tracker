@@ -53,4 +53,12 @@ describe('verificarContraPanel', () => {
     expect(w.cuadra).toBe(false);
     expect(w.diferencias.find((d) => d.medida === 'hablaBien')).toMatchObject({ vuelta: 1, panel: 99, explicadaPor: [] });
   });
+  it('una anomalía de otra columna no explica la diferencia', () => {
+    const sucia = fichaDe([fila(2), fila(3, { ia: 'Gemini', fuente: null })]); // "Falta la fuente" en la vuelta 1
+    const ficha = { ...sucia, panel: panelComoExcel(sucia.filas) };
+    const alterada = { ...ficha, panel: { ...ficha.panel, vueltas: { ...ficha.panel.vueltas, 1: { ...ficha.panel.vueltas[1], hablaBien: 99 } } } };
+    const v = verificarContraPanel(alterada, importarFicha(alterada, op()), diagnosticarFicha(alterada), op());
+    expect(v.cuadra).toBe(false);
+    expect(v.diferencias.find((d) => d.medida === 'hablaBien')?.explicadaPor).toEqual([]);
+  });
 });

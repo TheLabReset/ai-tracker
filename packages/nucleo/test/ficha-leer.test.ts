@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FichaInvalidaError, leerFicha } from '../src/ficha/leer';
 import { panelComoExcel } from '../src/ficha/panel';
+import { diagnosticarFicha } from '../src/ficha/diagnostico';
 import { crearFichaSintetica } from './ayudas/ficha-sintetica';
 
 const filas = [
@@ -42,5 +43,12 @@ describe('leerFicha', () => {
   it('rechaza archivos que no son la ficha', () => {
     expect(() => leerFicha(crearFichaSintetica({ filas, sinHoja: 'Registro' }))).toThrow(FichaInvalidaError);
     expect(() => leerFicha(crearFichaSintetica({ filas, encabezadoRoto: true }))).toThrow(/encabezado/i);
+  });
+  it('lee también las filas después de la 401, que el Panel de la ficha no cuenta', () => {
+    const vacias = Array.from({ length: 400 }, () => [null]);
+    const larga = leerFicha(crearFichaSintetica({ filas: [...vacias, filas[0]!] }));
+    expect(larga.filas.map((f) => f.fila)).toEqual([402]);
+    expect(panelComoExcel(larga.filas).vueltas[1].respuestas).toBe(0);
+    expect(diagnosticarFicha(larga).map((a) => [a.tipo, a.fila])).toContainEqual(['fuera_del_panel', 402]);
   });
 });

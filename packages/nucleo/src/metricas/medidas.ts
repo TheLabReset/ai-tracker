@@ -86,8 +86,9 @@ export function medir(medida: Medida, respuestas: Respuesta[], marcaId: string, 
         }),
       );
     case 'posicion_media':
+      // Lo importado no trae la posición exacta de "Más abajo": promediarlo sesgaría hacia arriba.
       return agregar(
-        base.flatMap((r) => {
+        base.filter((r) => r.origen === 'auto').flatMap((r) => {
           const posicion = evaluar(r).posicion;
           return posicion === null ? [] : [{ peso: peso(r), valor: posicion, exito: true }];
         }),
@@ -106,14 +107,16 @@ export function medir(medida: Medida, respuestas: Respuesta[], marcaId: string, 
       let numerador = 0;
       let denominador = 0;
       let exitos = 0;
-      for (const r of base) {
+      // La columna libre de la ficha solo anota a quienes van antes que nosotros: no sirve para SoV.
+      const automaticas = base.filter((r) => r.origen === 'auto');
+      for (const r of automaticas) {
         const propia = evaluar(r).nombra;
         const otras = [...marcas].filter((id) => id !== marcaId && r.menciones.some((m) => m.marcaId === id)).length;
         numerador += peso(r) * (propia ? 1 : 0);
         denominador += peso(r) * ((propia ? 1 : 0) + otras);
         if (propia) exitos += 1;
       }
-      return { valor: denominador === 0 ? null : (numerador / denominador) * 100, exitos, respuestas: base.length };
+      return { valor: denominador === 0 ? null : (numerador / denominador) * 100, exitos, respuestas: automaticas.length };
     }
     default:
       throw new Error(`Medida desconocida: ${medida}`);

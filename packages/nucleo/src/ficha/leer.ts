@@ -64,7 +64,8 @@ export class FichaInvalidaError extends Error {
 }
 
 const COLUMNAS = ['fecha', 'vuelta', 'pregunta', 'ia', 'nombra', 'puesto', 'sentimiento', 'fuente', 'marcasPrimero', 'puntos', 'estado'] as const;
-const ULTIMA_FILA_REGISTRO = 401;
+/** Las fórmulas del Panel solo miran Registro!2:401; las filas posteriores se leen igual. */
+export const ULTIMA_FILA_DEL_PANEL = 401;
 
 function valor(ws: XLSX.WorkSheet, direccion: string): ValorCelda {
   const celda = ws[direccion] as XLSX.CellObject | undefined;
@@ -136,7 +137,8 @@ export function leerFicha(contenido: Uint8Array): FichaCruda {
   });
 
   const filas: FilaCruda[] = [];
-  for (let r = 1; r < ULTIMA_FILA_REGISTRO; r++) {
+  const ultimaFila = Math.max(ULTIMA_FILA_DEL_PANEL, registro['!ref'] ? XLSX.utils.decode_range(registro['!ref']).e.r + 1 : 0);
+  for (let r = 1; r < ultimaFila; r++) {
     const valores = COLUMNAS.map((_, c) => valor(registro, XLSX.utils.encode_cell({ r, c })));
     if (valores.slice(0, 9).every(vacia)) continue;
     const fila = { fila: r + 1 } as FilaCruda;
