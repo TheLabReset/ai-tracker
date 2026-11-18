@@ -1,1 +1,2 @@
-export { redondearExcel } from './metricas/redondeo';
+export * from './metricas/redondeo';
+export * from './texto';
