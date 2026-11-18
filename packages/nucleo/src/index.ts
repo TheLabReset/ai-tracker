@@ -20,3 +20,5 @@ export * from './indicadores/catalogo';
 export * from './ficha/leer';
 export * from './ficha/panel';
 export * from './ficha/diagnostico';
+export * from './ficha/importar';
+export * from './ficha/verificar';
