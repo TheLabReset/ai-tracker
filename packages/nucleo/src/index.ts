@@ -6,3 +6,6 @@ export * from './calendario';
 export * from './preguntas';
 export * from './marcas';
 export * from './fuentes';
+export * from './lector/esquema';
+export * from './lector/mensajes';
+export * from './lector/interpretar';
