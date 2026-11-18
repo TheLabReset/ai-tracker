@@ -17,3 +17,5 @@ export * from './metricas/ruido';
 export * from './indicadores/definicion';
 export * from './indicadores/calcular';
 export * from './indicadores/catalogo';
+export * from './ficha/leer';
+export * from './ficha/panel';
