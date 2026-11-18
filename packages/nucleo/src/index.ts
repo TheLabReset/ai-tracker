@@ -14,3 +14,6 @@ export * from './evaluacion';
 export * from './lector/acuerdo';
 export * from './metricas/medidas';
 export * from './metricas/ruido';
+export * from './indicadores/definicion';
+export * from './indicadores/calcular';
+export * from './indicadores/catalogo';
