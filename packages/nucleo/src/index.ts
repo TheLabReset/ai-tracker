@@ -9,3 +9,4 @@ export * from './fuentes';
 export * from './lector/esquema';
 export * from './lector/mensajes';
 export * from './lector/interpretar';
+export * from './lector/controles';
