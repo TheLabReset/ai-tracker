@@ -12,3 +12,5 @@ export * from './lector/interpretar';
 export * from './lector/controles';
 export * from './evaluacion';
 export * from './lector/acuerdo';
+export * from './metricas/medidas';
+export * from './metricas/ruido';
