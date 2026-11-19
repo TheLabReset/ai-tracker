@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ErrorVariableFaltante, PLANTILLAS_COMPAT, armarSetCompat, renderizarPlantilla, variablesDe } from '../src/preguntas';
+import { ErrorVariableFaltante, PLANTILLAS_COMPAT, armarSetCompat, armarSetExtendido, renderizarPlantilla, variablesDe, variablesDesconocidas } from '../src/preguntas';
 
 describe('preguntas', () => {
   const pad = { categoria: 'educación ejecutiva', marca: 'Programa de Alta Dirección', competidor: 'Pacífico Business School' };
@@ -21,5 +21,17 @@ describe('preguntas', () => {
     expect(() => renderizarPlantilla('¿Qué {categoria} me recomiendas para {necesidad}?', { categoria: 'calzado' })).toThrow(
       ErrorVariableFaltante,
     );
+  });
+});
+
+describe('set extendido y variables', () => {
+  it('arma las preguntas abiertas de cada categoría específica', () => {
+    const set = armarSetExtendido(['pollo']);
+    expect(set.map((p) => [p.codigo, p.tipo, p.categoria])).toEqual([['P1·pollo', 'descubrimiento', 'pollo'], ['P3·pollo', 'descubrimiento', 'pollo'], ['P4·pollo', 'descubrimiento', 'pollo']]);
+    expect(set[0]?.texto).toBe('¿Qué marca de pollo me recomiendas en Perú?');
+  });
+  it('lista las variables que no son de la plantilla', () => {
+    expect(variablesDesconocidas('¿Qué {categoria} para {distrito} y {distrito} en {zona}?')).toEqual(['distrito', 'zona']);
+    expect(variablesDesconocidas(PLANTILLAS_COMPAT[1]!.texto)).toEqual([]);
   });
 });

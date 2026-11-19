@@ -52,6 +52,8 @@ export const FUENTES_TERCEROS: readonly Fuente[] = ['Medio de prensa', 'Comparad
 
 export type CategoriaDominio = 'Medio de prensa' | 'Comparador' | 'Reseña' | 'Red social' | 'Otra' | 'Web de marca';
 
+export type Cadencia = 'semanal' | 'quincenal' | 'manual';
+
 export interface Pesos {
   1: number;
   2: number;

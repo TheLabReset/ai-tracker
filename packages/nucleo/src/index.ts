@@ -4,6 +4,8 @@ export * from './dominio';
 export * from './valores';
 export * from './calendario';
 export * from './preguntas';
+export * from './acceso';
+export * from './costo';
 export * from './marcas';
 export * from './fuentes';
 export * from './lector/esquema';
