@@ -7,17 +7,15 @@ import { useDatos } from '../../app/proveedores';
 import { useSesion } from '../../sesion/useSesion';
 import { aplicar, borradorInicial, erroresDelPaso, PASOS } from './borrador';
 import { PasoCompetidores } from './PasoCompetidores';
+import { PasoConfirmar } from './PasoConfirmar';
 import { PasoExploracion } from './PasoExploracion';
 import { PasoMarca } from './PasoMarca';
+import { PasoMotores } from './PasoMotores';
 import { PasoPreguntas } from './PasoPreguntas';
 import { PasoSector } from './PasoSector';
 import type { PropsPaso } from './tipos';
 
-function PasoPendiente(_: PropsPaso) {
-  return <p className="text-tinta-2">Este paso llega pronto.</p>;
-}
-
-const COMPONENTES: Array<ComponentType<PropsPaso>> = [PasoMarca, PasoSector, PasoExploracion, PasoCompetidores, PasoPreguntas, PasoPendiente, PasoPendiente];
+const COMPONENTES: Array<ComponentType<PropsPaso>> = [PasoMarca, PasoSector, PasoExploracion, PasoCompetidores, PasoPreguntas, PasoMotores, PasoConfirmar];
 
 function Asistido({ perfil }: { perfil: Perfil }) {
   const datos = useDatos();

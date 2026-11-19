@@ -9,6 +9,7 @@ import { Catalogo } from '../sectores/Catalogo';
 import { Sectores } from '../sectores/Sectores';
 import { CrearClave } from '../sesion/CrearClave';
 import { useSesion } from '../sesion/useSesion';
+import { AvisoDeNavegacion } from './AvisoDeNavegacion';
 import { puedeCrearMarcas, SoloAdmin } from './guardas';
 import { useDatos } from './proveedores';
 
@@ -61,7 +62,7 @@ export function RutasInternas() {
       <Route path="/sectores" element={<Sectores />} />
       <Route path="/sectores/:sectorId" element={<Catalogo />} />
       <Route path="/marcas/nueva" element={<Asistente />} />
-      <Route path="/marcas/:proyectoId/configuracion" element={<Pantalla titulo="Configuración de la marca" />} />
+      <Route path="/marcas/:proyectoId/configuracion" element={<><Pantalla titulo="Configuración de la marca" /><AvisoDeNavegacion /></>} />
       <Route path="/admin/motores" element={<SoloAdmin><Motores /></SoloAdmin>} />
       <Route path="/admin/usuarios" element={<SoloAdmin><Usuarios /></SoloAdmin>} />
       <Route path="/admin/bitacora" element={<SoloAdmin><Bitacora /></SoloAdmin>} />

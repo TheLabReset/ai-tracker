@@ -22,7 +22,9 @@ export type Accion =
   | { tipo: 'quitarCompetidor'; indice: number }
   | { tipo: 'competidorPrincipal'; indice: number }
   | { tipo: 'preguntaPropia'; pregunta: { tipo: TipoPregunta; texto: string } }
-  | { tipo: 'quitarPreguntaPropia'; indice: number };
+  | { tipo: 'quitarPreguntaPropia'; indice: number }
+  | { tipo: 'motores'; ids: string[] }
+  | { tipo: 'programa'; cambios: Partial<Pick<Borrador, 'cadencia' | 'diaSemana' | 'hora' | 'muestras' | 'topeGastoMensual'>> };
 
 export interface ContextoPaso {
   sectores: Sector[];
@@ -126,6 +128,10 @@ export function aplicar(b: Borrador, accion: Accion): Borrador {
       return { ...b, preguntasPropias: [...b.preguntasPropias, accion.pregunta] };
     case 'quitarPreguntaPropia':
       return { ...b, preguntasPropias: b.preguntasPropias.filter((_, i) => i !== accion.indice) };
+    case 'motores':
+      return { ...b, motorIds: accion.ids };
+    case 'programa':
+      return { ...b, ...accion.cambios };
   }
 }
 
@@ -140,10 +146,20 @@ function erroresSector(b: Borrador, { sectores }: ContextoPaso): string[] {
   return errores;
 }
 
+function erroresMotores(b: Borrador): string[] {
+  const errores: string[] = [];
+  if (b.motorIds.length === 0) errores.push('Elige al menos un motor.');
+  if (!Number.isInteger(b.muestras) || b.muestras < 1 || b.muestras > 10) errores.push('Las muestras van de 1 a 10.');
+  if (b.topeGastoMensual !== null && !(b.topeGastoMensual >= 0)) errores.push('El tope de gasto no puede ser negativo.');
+  if (b.cadencia !== 'manual' && b.hora === '') errores.push('Elige la hora.');
+  return errores;
+}
+
 export function erroresDelPaso(b: Borrador, paso: number, contexto: ContextoPaso): string[] {
   if (paso === 1) return b.marca.nombre.trim() === '' ? ['Escribe el nombre de la marca.'] : [];
   if (paso === 2) return erroresSector(b, contexto);
   if (paso === 4) return b.competidores.length === 0 ? ['Elige al menos un competidor.'] : [];
+  if (paso === 6) return erroresMotores(b);
   return [];
 }
 
