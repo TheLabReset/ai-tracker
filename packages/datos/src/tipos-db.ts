@@ -39,6 +39,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"bitacora": {
+                  Row: {
+                    "accion": string,"antes": Json | null,"despues": Json | null,"entidad": string,"entidad_id": string,"fecha": string,"id": number,"usuario_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accion": string,"antes"?: Json | null,"despues"?: Json | null,"entidad": string,"entidad_id": string,"fecha"?: string,"id"?: number,"usuario_id"?: string | null
+                  }
+                  Update: {
+                    "accion"?: string,"antes"?: Json | null,"despues"?: Json | null,"entidad"?: string,"entidad_id"?: string,"fecha"?: string,"id"?: number,"usuario_id"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"empresas": {
                   Row: {
                     "dominio": string,"id": string

@@ -7,6 +7,7 @@ export {
   type CodigoError,
   type Datos,
   type DatosAlta,
+  type EntradaBitacora,
   type EstadoProyecto,
   type CambioMotor,
   type Marca,

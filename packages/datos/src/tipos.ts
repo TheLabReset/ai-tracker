@@ -162,6 +162,16 @@ export interface NuevaPregunta {
   categoria: string | null;
 }
 
+export interface EntradaBitacora {
+  fecha: string;
+  usuarioCorreo: string | null;
+  entidad: string;
+  entidadId: string;
+  accion: 'insertar' | 'actualizar' | 'borrar';
+  antes: unknown;
+  despues: unknown;
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -185,6 +195,7 @@ export interface Datos {
     cambios: Partial<Pick<Motor, 'modelo' | 'busquedaWeb' | 'costoEstimado' | 'activo'>>,
   ): Promise<Motor>;
   historialMotor(id: string): Promise<CambioMotor[]>;
+  listarBitacora(o?: { entidad?: string; limite?: number }): Promise<EntradaBitacora[]>;
   listarPlantillas(sectorId?: string): Promise<Plantilla[]>;
   crearPlantilla(p: { codigo: string; sectorId: string; tipo: TipoPregunta; texto: string }): Promise<Plantilla>;
   crearProyecto(d: DatosAlta): Promise<string>;

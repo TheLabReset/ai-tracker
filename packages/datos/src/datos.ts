@@ -1,3 +1,4 @@
+import { crearBitacora } from './bitacora';
 import { crearCatalogo } from './catalogo';
 import type { ClienteTracker } from './cliente';
 import { crearMotores } from './motores';
@@ -14,6 +15,7 @@ export function crearDatos(cliente: ClienteTracker): Datos {
     ...crearUsuarios(cliente, sesion.sesionActual),
     ...crearCatalogo(cliente),
     ...crearMotores(cliente),
+    ...crearBitacora(cliente),
     ...crearPlantillas(cliente),
     ...crearProyectos(cliente, sesion.sesionActual),
   };
