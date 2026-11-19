@@ -36,13 +36,14 @@ alter table tracker.marcas enable row level security;
 alter table tracker.alias enable row level security;
 
 create function tracker.marcas_preparar() returns trigger
-language plpgsql security definer
+language plpgsql
 set search_path = ''
 as $$
 declare
   v_otra text;
 begin
   new.clave := tracker.clave(new.nombre);
+  perform pg_advisory_xact_lock(hashtextextended(new.sector_id::text || '/' || new.clave, 0));
   select m.nombre into v_otra from tracker.marcas m
     where m.sector_id = new.sector_id and m.id <> new.id and m.clave = new.clave
   union all
@@ -57,7 +58,7 @@ end
 $$;
 
 create function tracker.alias_preparar() returns trigger
-language plpgsql security definer
+language plpgsql
 set search_path = ''
 as $$
 declare
@@ -66,6 +67,7 @@ declare
 begin
   new.clave := tracker.clave(new.texto);
   select sector_id into v_sector from tracker.marcas where id = new.marca_id;
+  perform pg_advisory_xact_lock(hashtextextended(v_sector::text || '/' || new.clave, 0));
   select m.nombre into v_otra from tracker.marcas m
     where m.sector_id = v_sector and m.id <> new.marca_id and m.clave = new.clave
   union all

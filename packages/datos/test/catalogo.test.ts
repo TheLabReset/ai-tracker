@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { claveMarca } from '@lab/nucleo';
-import { clienteServicio } from './ayudas/entorno';
+import { crearClienteTracker } from '../src/cliente';
+import { clienteServicio, entorno } from './ayudas/entorno';
 import { usuarioDePrueba } from './ayudas/usuarios';
 
 const unico = (base: string) => `${base} ${crypto.randomUUID().slice(0, 8)}`;
@@ -82,5 +83,39 @@ describe('catálogo', () => {
     await expect(lector.datos.quitarAlias(alias.id)).rejects.toMatchObject({ codigo: 'sin_permiso' });
     await admin.datos.quitarAlias(alias.id);
     expect((await admin.datos.listarMarcas(sector.id)).find((m) => m.id === mapfre.id)?.alias).toEqual([]);
+  });
+  it('un anónimo no averigua qué hay en el catálogo por los errores', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const sector = await admin.datos.crearSector({ nombre: unico('Privado'), categoria: 'privado' });
+    await admin.datos.crearMarca(sector.id, nueva('Pacífico Business School', ['UP']));
+    const { url, claveAnonima } = entorno();
+    const anonimo = crearClienteTracker(url, claveAnonima);
+    const directo = await anonimo.from('marcas').insert({ sector_id: sector.id, nombre: 'UP' });
+    const rpc = await anonimo.rpc('crear_marca', { sector: sector.id, datos: { nombre: 'UP', alias: [] } });
+    for (const r of [directo, rpc]) {
+      expect(r.error?.code).toBe('42501');
+      expect(JSON.stringify(r.error)).not.toContain('Pacífico');
+    }
+  });
+  it('dos altas simultáneas con el mismo alias en el sector: solo una pasa', async () => {
+    const a = await usuarioDePrueba({ admin: true });
+    const b = await usuarioDePrueba({ admin: true });
+    const sector = await a.datos.crearSector({ nombre: unico('Carreras'), categoria: 'carreras' });
+    const resultados = await Promise.allSettled([
+      a.datos.crearMarca(sector.id, nueva('Marca X', ['Carrera zzz'])),
+      b.datos.crearMarca(sector.id, nueva('Marca Y', ['CARRERA ZZZ'])),
+    ]);
+    expect(resultados.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    const rechazo = resultados.find((r) => r.status === 'rejected') as PromiseRejectedResult;
+    expect(rechazo.reason).toMatchObject({ codigo: 'colision_alias' });
+  });
+  it('un sector repetido da un error en español', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const nombre = unico('Repetido');
+    await admin.datos.crearSector({ nombre, categoria: 'x' });
+    await expect(admin.datos.crearSector({ nombre, categoria: 'x' })).rejects.toMatchObject({
+      codigo: 'datos_invalidos',
+      message: 'Ya existe un sector con ese nombre.',
+    });
   });
 });

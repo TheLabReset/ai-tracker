@@ -22,6 +22,12 @@ interface ErrorCrudo {
 const esDeRed = (e: ErrorCrudo) =>
   e.name === 'AuthRetryableFetchError' || /fetch failed|failed to fetch|networkerror|econnrefused/i.test(e.message ?? '');
 
+function textoDuplicado(mensaje: string): string {
+  if (mensaje.includes('sectores_nombre_key')) return 'Ya existe un sector con ese nombre.';
+  if (mensaje.includes('marcas_sector_id_clave_key')) return 'Ya hay una marca con ese nombre en el sector.';
+  return 'Ese dato ya existe.';
+}
+
 export function traducirError(error: unknown): ErrorDatos {
   if (error instanceof ErrorDatos) return error;
   const e = (error ?? {}) as ErrorCrudo;
@@ -31,6 +37,7 @@ export function traducirError(error: unknown): ErrorDatos {
     return new ErrorDatos(mensaje as CodigoError, e.details || mensaje);
   }
   if (e.code === '42501') return new ErrorDatos('sin_permiso', e.details || 'No tienes permiso para hacer esto.');
+  if (e.code === '23505') return new ErrorDatos('datos_invalidos', textoDuplicado(mensaje));
   if (['22P02', '23502', '23503', '23514'].includes(e.code ?? '')) {
     return new ErrorDatos('datos_invalidos', 'Los datos no son válidos.');
   }
