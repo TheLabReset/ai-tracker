@@ -44,8 +44,11 @@ describe('usuarios y sesión', () => {
   it('quitar una membresía ajena sin ser admin da sin_permiso', async () => {
     const otro = await usuarioDePrueba();
     const u = await usuarioDePrueba();
-    const marcaId = crypto.randomUUID();
-    await clienteServicio().from('membresias').insert({ usuario_id: otro.id, marca_id: marcaId, rol: 'lector' });
+    const servicio = clienteServicio();
+    const { data: sector } = await servicio.from('sectores').insert({ nombre: `Sector ${crypto.randomUUID()}`, categoria: 'prueba' }).select().single();
+    const { data: marca } = await servicio.from('marcas').insert({ sector_id: sector.id, nombre: 'Marca de prueba' }).select().single();
+    const marcaId = marca.id;
+    await servicio.from('membresias').insert({ usuario_id: otro.id, marca_id: marcaId, rol: 'lector' });
     await expect(u.datos.quitarMembresia(otro.id, marcaId)).rejects.toMatchObject({ codigo: 'sin_permiso' });
   });
   it('crearClave sin sesión da datos_invalidos con texto en español', async () => {

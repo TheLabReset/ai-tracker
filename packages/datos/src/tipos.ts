@@ -38,6 +38,36 @@ export interface UsuarioListado {
   membresias: Array<{ marcaId: string; marcaNombre: string; rol: RolMarca }>;
 }
 
+export interface Sector {
+  id: string;
+  nombre: string;
+  categoria: string;
+}
+
+export interface AliasGuardado {
+  id: string;
+  texto: string;
+  ambiguo: boolean;
+}
+
+export interface Marca {
+  id: string;
+  sectorId: string;
+  nombre: string;
+  ambiguo: boolean;
+  esCliente: boolean;
+  empresaId: 'reset' | 'wanted' | null;
+  dominios: string[];
+  alias: AliasGuardado[];
+}
+
+export interface NuevaMarca {
+  nombre: string;
+  ambiguo: boolean;
+  alias: Array<{ texto: string; ambiguo: boolean }>;
+  dominios: string[];
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -49,4 +79,10 @@ export interface Datos {
   cambiarAdmin(usuarioId: string, esAdmin: boolean): Promise<void>;
   asignarMembresia(usuarioId: string, marcaId: string, rol: RolMarca): Promise<void>;
   quitarMembresia(usuarioId: string, marcaId: string): Promise<void>;
+  listarSectores(): Promise<Sector[]>;
+  crearSector(s: { nombre: string; categoria: string }): Promise<Sector>;
+  listarMarcas(sectorId: string): Promise<Marca[]>;
+  crearMarca(sectorId: string, m: NuevaMarca): Promise<Marca>;
+  agregarAlias(marcaId: string, a: { texto: string; ambiguo: boolean }): Promise<AliasGuardado>;
+  quitarAlias(aliasId: string): Promise<void>;
 }

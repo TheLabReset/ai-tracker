@@ -19,6 +19,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"alias": {
+                  Row: {
+                    "ambiguo": boolean,"clave": string,"id": string,"marca_id": string,"texto": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ambiguo"?: boolean,"clave": string,"id"?: string,"marca_id": string,"texto": string
+                  }
+                  Update: {
+                    "ambiguo"?: boolean,"clave"?: string,"id"?: string,"marca_id"?: string,"texto"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "alias_marca_id_fkey"
+      columns: ["marca_id"]
+isOneToOne: false
+      referencedRelation: "marcas"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"empresas": {
                   Row: {
                     "dominio": string,"id": string
@@ -33,6 +53,32 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"marcas": {
+                  Row: {
+                    "ambiguo": boolean,"clave": string,"dominios": (string)[],"empresa_id": string | null,"es_cliente": boolean,"id": string,"nombre": string,"sector_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ambiguo"?: boolean,"clave": string,"dominios"?: (string)[],"empresa_id"?: string | null,"es_cliente"?: boolean,"id"?: string,"nombre": string,"sector_id": string
+                  }
+                  Update: {
+                    "ambiguo"?: boolean,"clave"?: string,"dominios"?: (string)[],"empresa_id"?: string | null,"es_cliente"?: boolean,"id"?: string,"nombre"?: string,"sector_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "marcas_empresa_id_fkey"
+      columns: ["empresa_id"]
+isOneToOne: false
+      referencedRelation: "empresas"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "marcas_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"membresias": {
                   Row: {
                     "marca_id": string,"rol": string,"usuario_id": string
@@ -46,12 +92,32 @@ export type Database = {
                   }
                   Relationships: [
                     {
+      foreignKeyName: "membresias_marca_fk"
+      columns: ["marca_id"]
+isOneToOne: false
+      referencedRelation: "marcas"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "membresias_usuario_id_fkey"
       columns: ["usuario_id"]
 isOneToOne: false
       referencedRelation: "usuarios"
       referencedColumns: ["id"]
     }
+                  ]
+                },"sectores": {
+                  Row: {
+                    "categoria": string,"id": string,"idioma": string,"nombre": string,"pais": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "categoria": string,"id"?: string,"idioma"?: string,"nombre": string,"pais"?: string
+                  }
+                  Update: {
+                    "categoria"?: string,"id"?: string,"idioma"?: string,"nombre"?: string,"pais"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"usuarios": {
                   Row: {
@@ -85,6 +151,9 @@ isOneToOne: false
 "clave":
 { Args: { "t": string }; Returns: string
                            },
+"crear_marca":
+{ Args: { "datos": Json,"sector": string }; Returns: string
+                           },
 "es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -96,6 +165,9 @@ isOneToOne: false
                            },
 "perfil_de":
 { Args: { "usuario": string }; Returns: Json
+                           },
+"puede_ampliar_catalogo":
+{ Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "puede_editar_marca":
 { Args: { "marca": string }; Returns: boolean

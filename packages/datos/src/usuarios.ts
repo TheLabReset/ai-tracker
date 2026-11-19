@@ -21,7 +21,7 @@ export function crearUsuarios(cliente: ClienteTracker, sesionActual: Datos['sesi
       conTraduccion(async () => {
         if (!(await sesionActual())?.esAdmin) throw sinPermiso();
         const usuarios = comprobarLista(await cliente.from('usuarios').select('*').order('nombre'));
-        const membresias = comprobarLista(await cliente.from('membresias').select('*'));
+        const membresias = comprobarLista(await cliente.from('membresias').select('*, marcas(nombre)'));
         return usuarios.map(
           (u: any): UsuarioListado => ({
             id: u.id,
@@ -31,7 +31,7 @@ export function crearUsuarios(cliente: ClienteTracker, sesionActual: Datos['sesi
             esAdmin: u.es_admin,
             membresias: membresias
               .filter((m: any) => m.usuario_id === u.id)
-              .map((m: any) => ({ marcaId: m.marca_id, marcaNombre: m.marca_id, rol: m.rol })),
+              .map((m: any) => ({ marcaId: m.marca_id, marcaNombre: m.marcas?.nombre ?? m.marca_id, rol: m.rol })),
           }),
         );
       }),
