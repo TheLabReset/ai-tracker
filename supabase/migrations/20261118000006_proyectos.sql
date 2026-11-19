@@ -69,6 +69,8 @@ declare
   v_sector uuid;
   v_sector_nuevo boolean;
   v_marca uuid;
+  v_nombre text;
+  v_clave text;
   v_proyecto uuid;
   v_lider uuid;
   v_responsable uuid;
@@ -95,11 +97,8 @@ begin
   v_admin := tracker.es_admin();
   v_lider := case when v_admin then nullif(d ->> 'liderId', '')::uuid else v_yo end;
   v_responsable := nullif(d ->> 'responsableId', '')::uuid;
-  if not v_admin and (
-    (nullif(d ->> 'liderId', '') is not null and nullif(d ->> 'liderId', '')::uuid <> v_yo)
-    or (v_responsable is not null and v_responsable <> v_yo)
-  ) then
-    raise exception using message = 'sin_permiso', detail = 'Solo un admin puede asignar a otra persona.', errcode = '42501';
+  if not v_admin and nullif(d ->> 'liderId', '') is not null and nullif(d ->> 'liderId', '')::uuid <> v_yo then
+    raise exception using message = 'sin_permiso', detail = 'Solo un admin puede asignar a otra persona como líder.', errcode = '42501';
   end if;
   if v_lider is not null and not exists (select 1 from tracker.usuarios where id = v_lider) then
     raise exception using message = 'datos_invalidos', detail = 'No encontramos al líder.';
@@ -178,23 +177,47 @@ begin
     returning id into v_sector;
   end if;
 
-  insert into tracker.marcas (sector_id, nombre, ambiguo, es_cliente, empresa_id, dominios)
-  values (
-    v_sector,
-    d -> 'marca' ->> 'nombre',
-    coalesce((d -> 'marca' ->> 'ambiguo')::boolean, false),
-    true,
-    d -> 'marca' ->> 'empresaId',
-    coalesce(array(select jsonb_array_elements_text(coalesce(d -> 'marca' -> 'dominios', '[]'::jsonb))), '{}')
-  )
-  returning id into v_marca;
+  if not v_sector_nuevo then
+    v_clave := tracker.clave(d -> 'marca' ->> 'nombre');
+    perform pg_advisory_xact_lock(hashtextextended(v_sector::text || '/' || v_clave, 0));
+    select id, nombre into v_marca, v_nombre from tracker.marcas where sector_id = v_sector and clave = v_clave;
+  end if;
+  if v_marca is not null then
+    if exists (select 1 from tracker.proyectos where marca_id = v_marca) then
+      raise exception using message = 'datos_invalidos', detail = '«' || v_nombre || '» ya tiene su proyecto.';
+    end if;
+    update tracker.marcas set
+      es_cliente = true,
+      empresa_id = d -> 'marca' ->> 'empresaId',
+      ambiguo = ambiguo or coalesce((d -> 'marca' ->> 'ambiguo')::boolean, false),
+      dominios = array(
+        select x from unnest(dominios || coalesce(array(select jsonb_array_elements_text(coalesce(d -> 'marca' -> 'dominios', '[]'::jsonb))), '{}'))
+          with ordinality t(x, o) group by x order by min(o))
+    where id = v_marca;
+  else
+    insert into tracker.marcas (sector_id, nombre, ambiguo, es_cliente, empresa_id, dominios)
+    values (
+      v_sector,
+      d -> 'marca' ->> 'nombre',
+      coalesce((d -> 'marca' ->> 'ambiguo')::boolean, false),
+      true,
+      d -> 'marca' ->> 'empresaId',
+      coalesce(array(select jsonb_array_elements_text(coalesce(d -> 'marca' -> 'dominios', '[]'::jsonb))), '{}')
+    )
+    returning id into v_marca;
+  end if;
   for a in select * from jsonb_array_elements(coalesce(d -> 'marca' -> 'alias', '[]'::jsonb)) loop
-    insert into tracker.alias (marca_id, texto, ambiguo)
-    values (v_marca, a ->> 'texto', coalesce((a ->> 'ambiguo')::boolean, false));
+    if not exists (select 1 from tracker.alias where marca_id = v_marca and clave = tracker.clave(a ->> 'texto')) then
+      insert into tracker.alias (marca_id, texto, ambiguo)
+      values (v_marca, a ->> 'texto', coalesce((a ->> 'ambiguo')::boolean, false));
+    end if;
   end loop;
 
   for c in select * from jsonb_array_elements(v_comp) loop
     v_id := case when c ? 'id' then (c ->> 'id')::uuid else tracker.crear_marca(v_sector, c) end;
+    if v_id = v_marca then
+      raise exception using message = 'datos_invalidos', detail = 'La marca no puede ser su propio competidor.';
+    end if;
     v_ids := v_ids || v_id;
   end loop;
 
