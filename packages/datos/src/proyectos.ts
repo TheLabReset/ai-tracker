@@ -4,7 +4,18 @@ import { comprobar, comprobarLista, conTraduccion, sinPermiso } from './errores'
 import { aMotor } from './motores';
 import type { Datos, PreguntaProyecto, Proyecto, ResumenProyecto } from './tipos';
 
-type Proyectos = Pick<Datos, 'crearProyecto' | 'listarProyectos' | 'obtenerProyecto'>;
+type Proyectos = Pick<
+  Datos,
+  | 'crearProyecto'
+  | 'listarProyectos'
+  | 'obtenerProyecto'
+  | 'actualizarProyecto'
+  | 'cambiarCompetidores'
+  | 'editarPregunta'
+  | 'agregarPregunta'
+  | 'desactivarPregunta'
+  | 'cambiarEstado'
+>;
 
 const aPregunta = (f: any): PreguntaProyecto => ({
   id: f.id,
@@ -88,6 +99,36 @@ export function crearProyectos(cliente: ClienteTracker, sesionActual: Datos['ses
           estado: fila.estado,
         };
         return proyecto;
+      }),
+
+    actualizarProyecto: (id, c) =>
+      conTraduccion(async () => {
+        comprobar(await cliente.rpc('actualizar_proyecto', { p: id, c }));
+      }),
+
+    cambiarCompetidores: (id, marcaIds) =>
+      conTraduccion(async () => {
+        comprobar(await cliente.rpc('cambiar_competidores', { p: id, marcas: marcaIds }));
+      }),
+
+    editarPregunta: (preguntaId, texto) =>
+      conTraduccion(async () => aPregunta(comprobar(await cliente.rpc('editar_pregunta', { pregunta: preguntaId, texto })))),
+
+    agregarPregunta: (proyectoId, p) =>
+      conTraduccion(async () =>
+        aPregunta(
+          comprobar(await cliente.rpc('agregar_pregunta', { proyecto: proyectoId, tipo: p.tipo, texto: p.texto, categoria: p.categoria })),
+        ),
+      ),
+
+    desactivarPregunta: (preguntaId) =>
+      conTraduccion(async () => {
+        comprobar(await cliente.rpc('desactivar_pregunta', { pregunta: preguntaId }));
+      }),
+
+    cambiarEstado: (id, estado) =>
+      conTraduccion(async () => {
+        comprobar(await cliente.rpc('cambiar_estado', { p: id, estado }));
       }),
   };
 }

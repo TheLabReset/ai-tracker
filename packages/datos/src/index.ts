@@ -3,6 +3,7 @@ export { crearDatos } from './datos';
 export {
   ErrorDatos,
   type AliasGuardado,
+  type CambiosProyecto,
   type CodigoError,
   type Datos,
   type DatosAlta,
@@ -11,6 +12,7 @@ export {
   type Marca,
   type Motor,
   type NuevaMarca,
+  type NuevaPregunta,
   type Perfil,
   type Plantilla,
   type PreguntaProyecto,

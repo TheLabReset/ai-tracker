@@ -152,6 +152,16 @@ export interface DatosAlta {
   responsableId?: string;
 }
 
+export type CambiosProyecto = Partial<
+  Pick<Proyecto, 'cadencia' | 'diaSemana' | 'hora' | 'muestras' | 'pesos' | 'topeGastoMensual' | 'categoriasExtra' | 'competidorPrincipalId'>
+> & { motorIds?: string[] };
+
+export interface NuevaPregunta {
+  tipo: TipoPregunta;
+  texto: string;
+  categoria: string | null;
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -180,4 +190,10 @@ export interface Datos {
   crearProyecto(d: DatosAlta): Promise<string>;
   listarProyectos(): Promise<ResumenProyecto[]>;
   obtenerProyecto(id: string): Promise<Proyecto>;
+  actualizarProyecto(id: string, c: CambiosProyecto): Promise<void>;
+  cambiarCompetidores(id: string, marcaIds: string[]): Promise<void>;
+  editarPregunta(preguntaId: string, texto: string): Promise<PreguntaProyecto>;
+  agregarPregunta(proyectoId: string, p: NuevaPregunta): Promise<PreguntaProyecto>;
+  desactivarPregunta(preguntaId: string): Promise<void>;
+  cambiarEstado(id: string, estado: EstadoProyecto): Promise<void>;
 }

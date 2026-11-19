@@ -315,8 +315,36 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "cambiar_admin":
+            "actualizar_proyecto":
+{ Args: { "c": Json,"p": string }; Returns: undefined
+                           },
+"agregar_pregunta":
+{ Args: { "categoria": string,"proyecto": string,"texto": string,"tipo": string }; Returns: {
+              "activa": boolean,
+"categoria": string | null,
+"codigo": string,
+"id": string,
+"proyecto_id": string,
+"reemplaza_a": string | null,
+"set": string,
+"texto": string,
+"tipo": string,
+"version": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "preguntas"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"cambiar_admin":
 { Args: { "usuario": string,"valor": boolean }; Returns: undefined
+                           },
+"cambiar_competidores":
+{ Args: { "marcas": (string)[],"p": string }; Returns: undefined
+                           },
+"cambiar_estado":
+{ Args: { "estado": string,"p": string }; Returns: undefined
                            },
 "clave":
 { Args: { "t": string }; Returns: string
@@ -327,6 +355,28 @@ isOneToOne: false
 "crear_proyecto":
 { Args: { "d": Json }; Returns: string
                            },
+"desactivar_pregunta":
+{ Args: { "pregunta": string }; Returns: undefined
+                           },
+"editar_pregunta":
+{ Args: { "pregunta": string,"texto": string }; Returns: {
+              "activa": boolean,
+"categoria": string | null,
+"codigo": string,
+"id": string,
+"proyecto_id": string,
+"reemplaza_a": string | null,
+"set": string,
+"texto": string,
+"tipo": string,
+"version": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "preguntas"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -335,6 +385,9 @@ isOneToOne: false
                            },
 "es_usuario":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"exigir_edicion":
+{ Args: { "p": string }; Returns: undefined
                            },
 "perfil_de":
 { Args: { "usuario": string }; Returns: Json
