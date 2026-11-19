@@ -1,6 +1,6 @@
 import type { Datos, DatosAlta } from '@lab/datos';
 import { describe, expect, it } from 'vitest';
-import { crearDatosEnMemoria, motoresIniciales } from './ayudas/datos-en-memoria';
+import { crearDatosEnMemoria, idDeUsuario, motoresIniciales } from './ayudas/datos-en-memoria';
 
 const ADMIN = 'admin@reset.com.pe';
 const LIDER = 'lider@reset.com.pe';
@@ -97,22 +97,22 @@ describe('datos en memoria: usuarios', () => {
     await conSesion(d, LIDER, async () => {
       expect(await d.listarDirectorio()).toHaveLength(3);
       expect(await codigoDe(d.listarUsuarios())).toEqual({ codigo: 'sin_permiso', mensaje: 'Solo un admin puede hacer esto.' });
-      expect(await codigoDe(d.cambiarAdmin(LIDER, true))).toEqual({ codigo: 'sin_permiso', mensaje: 'Solo un admin puede cambiar esto.' });
-      expect(await codigoDe(d.asignarMembresia(LIDER, 'x', 'lider'))).toMatchObject({ codigo: 'sin_permiso' });
-      expect(await codigoDe(d.quitarMembresia(LIDER, 'x'))).toMatchObject({ codigo: 'sin_permiso' });
+      expect(await codigoDe(d.cambiarAdmin(idDeUsuario(d, LIDER), true))).toEqual({ codigo: 'sin_permiso', mensaje: 'Solo un admin puede cambiar esto.' });
+      expect(await codigoDe(d.asignarMembresia(idDeUsuario(d, LIDER), 'x', 'lider'))).toMatchObject({ codigo: 'sin_permiso' });
+      expect(await codigoDe(d.quitarMembresia(idDeUsuario(d, LIDER), 'x'))).toMatchObject({ codigo: 'sin_permiso' });
     });
   });
 
   it('asigna, lista con nombre de marca y quita membresías; cambiarAdmin(false) lo quita de la lista', async () => {
     const d = montar();
     const { a } = await sectorConMarcas(d);
-    await d.asignarMembresia(LIDER, a.id, 'lector');
-    await d.asignarMembresia(LIDER, a.id, 'lider');
-    const lider = (await d.listarUsuarios()).find((u) => u.id === LIDER)!;
+    await d.asignarMembresia(idDeUsuario(d, LIDER), a.id, 'lector');
+    await d.asignarMembresia(idDeUsuario(d, LIDER), a.id, 'lider');
+    const lider = (await d.listarUsuarios()).find((u) => u.id === idDeUsuario(d, LIDER))!;
     expect(lider.membresias).toEqual([{ marcaId: a.id, marcaNombre: 'Rimac', rol: 'lider' }]);
-    await d.quitarMembresia(LIDER, a.id);
-    expect((await d.listarUsuarios()).find((u) => u.id === LIDER)!.membresias).toEqual([]);
-    await d.cambiarAdmin(ADMIN, false);
+    await d.quitarMembresia(idDeUsuario(d, LIDER), a.id);
+    expect((await d.listarUsuarios()).find((u) => u.id === idDeUsuario(d, LIDER))!.membresias).toEqual([]);
+    await d.cambiarAdmin(idDeUsuario(d, ADMIN), false);
     expect(d.estado.admins).not.toContain(ADMIN);
     expect(await codigoDe(d.listarUsuarios())).toMatchObject({ codigo: 'sin_permiso' });
   });
@@ -272,8 +272,8 @@ describe('datos en memoria: proyectos', () => {
       alta(sector.id, [a.id], {
         motorIds: [motor!.id],
         marca: { nombre: ' pacifico', ambiguo: true, alias: [{ texto: 'PS', ambiguo: false }, { texto: 'Pac', ambiguo: false }], dominios: ['pacifico.pe'], empresaId: 'wanted' },
-        liderId: LIDER,
-        responsableId: OTRO,
+        liderId: idDeUsuario(d, LIDER),
+        responsableId: idDeUsuario(d, OTRO),
       }),
     );
     expect(d.estado.marcas).toHaveLength(2);
@@ -283,8 +283,8 @@ describe('datos en memoria: proyectos', () => {
     expect(p).toMatchObject({ muestras: 3, cadencia: 'semanal', diaSemana: 3, hora: '07:00', pesos: { 1: 3, 2: 2, 3: 1 }, estado: 'activo', topeGastoMensual: null });
     expect(p.competidorPrincipalId).toBe(a.id);
     const usuarios = await d.listarUsuarios();
-    expect(usuarios.find((u) => u.id === LIDER)!.membresias[0]).toMatchObject({ rol: 'lider', marcaNombre: 'Pacifico' });
-    expect(usuarios.find((u) => u.id === OTRO)!.membresias[0]).toMatchObject({ rol: 'responsable' });
+    expect(usuarios.find((u) => u.id === idDeUsuario(d, LIDER))!.membresias[0]).toMatchObject({ rol: 'lider', marcaNombre: 'Pacifico' });
+    expect(usuarios.find((u) => u.id === idDeUsuario(d, OTRO))!.membresias[0]).toMatchObject({ rol: 'responsable' });
     expect(await codigoDe(d.crearProyecto(alta(sector.id, [a.id], { motorIds: [motor!.id], marca: { nombre: 'PACÍFICO', ambiguo: false, alias: [], dominios: [], empresaId: 'reset' } })))).toEqual({
       codigo: 'datos_invalidos',
       mensaje: '«Pacifico» ya tiene su proyecto.',
@@ -294,10 +294,10 @@ describe('datos en memoria: proyectos', () => {
   it('sector nuevo por nombre; un líder queda de líder y no puede nombrar a otro', async () => {
     const d = montar();
     const { sector, a } = await sectorConMarcas(d);
-    await d.asignarMembresia(LIDER, a.id, 'lider');
+    await d.asignarMembresia(idDeUsuario(d, LIDER), a.id, 'lider');
     const motor = (await d.listarMotores())[0]!.id;
     await conSesion(d, LIDER, async () => {
-      expect(await codigoDe(d.crearProyecto(alta(sector.id, [a.id], { motorIds: [motor], liderId: OTRO })))).toEqual({
+      expect(await codigoDe(d.crearProyecto(alta(sector.id, [a.id], { motorIds: [motor], liderId: idDeUsuario(d, OTRO) })))).toEqual({
         codigo: 'sin_permiso',
         mensaje: 'Solo un admin puede asignar a otra persona como líder.',
       });
@@ -338,7 +338,7 @@ describe('datos en memoria: edición', () => {
 
   it('toda edición pide admin o líder de esa marca, también con ids que no existen', async () => {
     const { d, id, p } = await conProyecto();
-    await d.asignarMembresia(OTRO, p.marca.id, 'responsable');
+    await d.asignarMembresia(idDeUsuario(d, OTRO), p.marca.id, 'responsable');
     await conSesion(d, OTRO, async () => {
       const esperado = { codigo: 'sin_permiso', mensaje: 'No tienes permiso para editar este proyecto.' };
       expect(await codigoDe(d.cambiarEstado(id, 'pausado'))).toEqual(esperado);
@@ -434,11 +434,56 @@ describe('datos en memoria: bitácora', () => {
     expect(todo[0]!.fecha > todo[1]!.fecha).toBe(true);
     expect(await d.listarBitacora({ entidad: 'marcas' })).toHaveLength(1);
     expect(await d.listarBitacora({ limite: 2 })).toHaveLength(2);
-    await d.asignarMembresia(LIDER, (await d.listarMarcas(sector.id))[0]!.id, 'lider');
-    await d.quitarMembresia(LIDER, (await d.listarMarcas(sector.id))[0]!.id);
+    await d.asignarMembresia(idDeUsuario(d, LIDER), (await d.listarMarcas(sector.id))[0]!.id, 'lider');
+    await d.quitarMembresia(idDeUsuario(d, LIDER), (await d.listarMarcas(sector.id))[0]!.id);
     expect((await d.listarBitacora({ entidad: 'membresias' })).map((e) => e.accion)).toEqual(['borrar', 'insertar']);
     await conSesion(d, LIDER, async () => {
       expect(await codigoDe(d.listarBitacora())).toEqual({ codigo: 'sin_permiso', mensaje: 'Solo un admin puede hacer esto.' });
     });
+  });
+});
+
+describe('datos en memoria: ids y validaciones de la base', () => {
+  it('los ids de usuario son uuid y un correo no vale como id', async () => {
+    const d = montar();
+    const { a } = await sectorConMarcas(d);
+    const id = idDeUsuario(d, LIDER);
+    expect(id).toMatch(/^[0-9a-f-]{36}$/);
+    expect((await d.listarDirectorio()).map((u) => u.id)).toContain(id);
+    expect((await d.sesionActual())!.id).toBe(idDeUsuario(d, ADMIN));
+    const invalido = { codigo: 'datos_invalidos', mensaje: 'Los datos no son válidos.' };
+    expect(await codigoDe(d.asignarMembresia(LIDER, a.id, 'lider'))).toEqual(invalido);
+    expect(await codigoDe(d.cambiarAdmin(LIDER, true))).toEqual(invalido);
+    expect(await codigoDe(d.cambiarAdmin(crypto.randomUUID(), true))).toEqual({ codigo: 'datos_invalidos', mensaje: 'No encontramos a esa persona.' });
+    const motor = (await d.listarMotores())[0]!.id;
+    expect(await codigoDe(d.crearProyecto(alta(a.sectorId, [a.id], { motorIds: [motor], liderId: LIDER })))).toEqual(invalido);
+    expect(await codigoDe(d.crearProyecto(alta(a.sectorId, [a.id], { motorIds: [motor], responsableId: OTRO })))).toEqual(invalido);
+    expect(await codigoDe(d.crearProyecto(alta(a.sectorId, [a.id], { motorIds: [motor], liderId: crypto.randomUUID() })))).toEqual({
+      codigo: 'datos_invalidos',
+      mensaje: 'No encontramos al líder.',
+    });
+  });
+
+  it('plantillas: sectorId vacío o tipo inválido fallan como en la base', async () => {
+    const d = montar();
+    const sector = await d.crearSector({ nombre: 'Seguros', categoria: 'seguros' });
+    const invalido = { codigo: 'datos_invalidos', mensaje: 'Los datos no son válidos.' };
+    expect(await codigoDe(d.crearPlantilla({ codigo: 'Z1', sectorId: '', tipo: 'marca', texto: 'x' }))).toEqual(invalido);
+    expect(await codigoDe(d.crearPlantilla({ codigo: 'Z1', sectorId: crypto.randomUUID(), tipo: 'marca', texto: 'x' }))).toEqual(invalido);
+    expect(await codigoDe(d.crearPlantilla({ codigo: 'Z1', sectorId: sector.id, tipo: 'rara' as never, texto: 'x' }))).toEqual(invalido);
+  });
+
+  it('un usuario creado por la sesión no puede entrar con clave vacía', async () => {
+    const d = montar();
+    d.estado.sesion = 'nuevo@reset.com.pe';
+    await d.sesionActual();
+    expect(await codigoDe(d.entrar('nuevo@reset.com.pe', ''))).toEqual({ codigo: 'credenciales', mensaje: 'Correo o clave incorrectos.' });
+  });
+
+  it('crearMarca devuelve los alias ordenados por texto', async () => {
+    const d = montar();
+    const sector = await d.crearSector({ nombre: 'Seguros', categoria: 'seguros' });
+    const m = await d.crearMarca(sector.id, { nombre: 'Rimac', ambiguo: false, alias: [{ texto: 'b', ambiguo: false }, { texto: 'a', ambiguo: false }], dominios: [] });
+    expect(m.alias.map((x) => x.texto)).toEqual(['a', 'b']);
   });
 });

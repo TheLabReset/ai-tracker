@@ -12,6 +12,12 @@ import { crearUsuarios } from './memoria/usuarios';
 export type { EstadoEnMemoria, UsuarioEnMemoria } from './memoria/contexto';
 export { motoresIniciales };
 
+export function idDeUsuario(datos: { estado: EstadoEnMemoria }, correo: string): string {
+  const u = datos.estado.usuarios.find((x) => x.correo.trim().toLowerCase() === correo.trim().toLowerCase());
+  if (!u) throw new Error(`no hay usuario ${correo}`);
+  return u.id;
+}
+
 export interface Semilla {
   usuarios?: Array<{ correo: string; clave: string; admin?: boolean }>;
   motores?: Motor[];
@@ -20,7 +26,7 @@ export interface Semilla {
 }
 
 export function crearDatosEnMemoria(semilla: Semilla = {}): Datos & { estado: EstadoEnMemoria } {
-  const usuarios = (semilla.usuarios ?? []).map((u) => ({ correo: u.correo.trim().toLowerCase(), clave: u.clave, admin: u.admin ?? false }));
+  const usuarios = (semilla.usuarios ?? []).map((u) => ({ id: crypto.randomUUID(), correo: u.correo.trim().toLowerCase(), clave: u.clave, admin: u.admin ?? false }));
   const estado: EstadoEnMemoria = {
     sesion: null,
     usuarios,

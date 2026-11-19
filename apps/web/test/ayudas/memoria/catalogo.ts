@@ -90,7 +90,7 @@ export function crearCatalogo(ctx: Contexto): Catalogo {
     crearMarca: (sectorId, m) =>
       ctx.escribir((yo) => {
         if (!ctx.puedeAmpliar(yo)) throw sinPermisoCatalogo();
-        return insertarMarca(ctx, sectorId, m);
+        return conAliasOrdenados(insertarMarca(ctx, sectorId, m));
       }),
 
     agregarAlias: (marcaId, a) =>

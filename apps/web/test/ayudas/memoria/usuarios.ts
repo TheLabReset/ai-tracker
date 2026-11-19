@@ -1,6 +1,6 @@
 import { ErrorDatos, type Datos, type RolMarca, type UsuarioListado } from '@lab/datos';
 import { empresaDeCorreo } from '@lab/nucleo';
-import { duplicado, generico, idDe, porTexto, sinPermiso, type Contexto } from './contexto';
+import { duplicado, esUuid, generico, idDe, porTexto, sinPermiso, type Contexto } from './contexto';
 
 type Usuarios = Pick<
   Datos,
@@ -40,12 +40,13 @@ export function crearUsuarios(ctx: Contexto): Usuarios {
     cambiarAdmin: (usuarioId, esAdmin) =>
       ctx.escribir((yo) => {
         if (!yo.admin) throw new ErrorDatos('sin_permiso', 'Solo un admin puede cambiar esto.');
+        if (!esUuid(usuarioId)) throw generico();
         const usuario = estado.usuarios.find((u) => idDe(u) === usuarioId);
         if (!usuario) throw new ErrorDatos('datos_invalidos', 'No encontramos a esa persona.');
-        const fila = () => ({ id: idDe(usuario), correo: idDe(usuario), empresa_id: empresaDeCorreo(usuario.correo), es_admin: usuario.admin });
+        const fila = () => ({ id: idDe(usuario), correo: usuario.correo, empresa_id: empresaDeCorreo(usuario.correo), es_admin: usuario.admin });
         const antes = fila();
         usuario.admin = esAdmin;
-        if (!esAdmin) estado.admins = estado.admins.filter((a) => a !== idDe(usuario));
+        if (!esAdmin) estado.admins = estado.admins.filter((a) => a !== usuario.correo);
         ctx.registrarSiCambia('usuarios', idDe(usuario), antes, fila());
       }),
 

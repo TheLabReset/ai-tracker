@@ -3,6 +3,7 @@ import { PESOS_EXCEL, claveMarca } from '@lab/nucleo';
 import { conAliasOrdenados, insertarAlias, insertarMarca, insertarSector, reutilizarMarca } from './catalogo';
 import {
   duplicado,
+  esUuid,
   generico,
   idDe,
   invalido,
@@ -13,11 +14,10 @@ import {
   type ProyectoEnMemoria,
 } from './contexto';
 import { ponerMembresia } from './usuarios';
-import { validarCadencia, validarDia, validarHora, validarMuestras, validarTope } from './validar';
+import { TIPOS_PREGUNTA, validarCadencia, validarDia, validarHora, validarMuestras, validarTope } from './validar';
 
 type Proyectos = Pick<Datos, 'crearProyecto' | 'listarProyectos' | 'obtenerProyecto'>;
 
-const TIPOS = ['descubrimiento', 'comparativa', 'marca'];
 const SETS = ['compat', 'extendido', 'propia'];
 
 const solo = (p: PreguntaEnMemoria) => ({ id: p.id, codigo: p.codigo, tipo: p.tipo, set: p.set, categoria: p.categoria, texto: p.texto, version: p.version });
@@ -59,6 +59,7 @@ export function crearProyecto(ctx: Contexto, d: DatosAlta): string {
   const liderPedido = d.liderId || undefined;
   const liderId = yo.admin ? liderPedido : idDe(yo);
   const responsableId = d.responsableId || undefined;
+  if ([liderPedido, responsableId].some((v) => v && !esUuid(v))) throw generico();
   if (!yo.admin && liderPedido && liderPedido !== idDe(yo)) {
     throw new ErrorDatos('sin_permiso', 'Solo un admin puede asignar a otra persona como líder.');
   }
@@ -117,7 +118,7 @@ export function crearProyecto(ctx: Contexto, d: DatosAlta): string {
     ctx.registrar('proyecto_motores', `${proyecto.id}/${m}`, 'insertar', null, { proyectoId: proyecto.id, motorId: m });
   }
   for (const q of d.preguntas) {
-    if (!TIPOS.includes(q.tipo) || !SETS.includes(q.set) || q.codigo.trim() === '' || q.texto.trim() === '') throw generico();
+    if (!TIPOS_PREGUNTA.includes(q.tipo) || !SETS.includes(q.set) || q.codigo.trim() === '' || q.texto.trim() === '') throw generico();
     if (estado.preguntas.some((x) => x.proyectoId === proyecto.id && x.codigo === q.codigo && x.version === 1)) throw duplicado();
     const pregunta: PreguntaEnMemoria = {
       id: ctx.nuevoId(),

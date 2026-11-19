@@ -14,6 +14,7 @@ import {
 import { empresaDeCorreo, esCorreoPermitido, type Cadencia, type Pesos } from '@lab/nucleo';
 
 export interface UsuarioEnMemoria {
+  id: string;
   correo: string;
   clave: string;
   admin: boolean;
@@ -74,7 +75,9 @@ export const INICIO = '2026-11-18T00:00:00.000Z';
 
 export const igual = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 export const porTexto = (a: string, b: string) => a.localeCompare(b, 'es');
-export const idDe = (u: UsuarioEnMemoria) => u.correo.trim().toLowerCase();
+export const idDe = (u: UsuarioEnMemoria) => u.id;
+export const correoDe = (u: UsuarioEnMemoria) => u.correo.trim().toLowerCase();
+export const esUuid = (v: unknown) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
 export const sinSesion = () => new ErrorDatos('sin_permiso', 'Tu sesión terminó. Vuelve a entrar.');
 export const sinPermiso = () => new ErrorDatos('sin_permiso', 'Solo un admin puede hacer esto.');
@@ -99,7 +102,7 @@ export function crearContexto(estado: EstadoEnMemoria) {
     if (existente) return existente;
     if (!esCorreoPermitido(estado.sesion)) throw sinSesion();
     const correo = estado.sesion.trim().toLowerCase();
-    const nuevo = { correo, clave: '', admin: estado.admins.includes(correo) };
+    const nuevo = { id: nuevoId(), correo, clave: nuevoId(), admin: estado.admins.includes(correo) };
     estado.usuarios.push(nuevo);
     return nuevo;
   };
@@ -113,8 +116,8 @@ export function crearContexto(estado: EstadoEnMemoria) {
 
   const perfilDe = (u: UsuarioEnMemoria): Perfil => ({
     id: idDe(u),
-    correo: idDe(u),
-    nombre: initcap((idDe(u).split('@')[0] ?? '').replace(/\./g, ' ')),
+    correo: correoDe(u),
+    nombre: initcap((correoDe(u).split('@')[0] ?? '').replace(/\./g, ' ')),
     empresaId: empresaDeCorreo(u.correo) ?? 'reset',
     esAdmin: u.admin,
     membresias: membresiasDe(u)

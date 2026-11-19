@@ -1,7 +1,7 @@
 import { ErrorDatos, type Datos } from '@lab/datos';
 import { invalido, sinEdicion, type Contexto, type PreguntaEnMemoria, type ProyectoEnMemoria } from './contexto';
 import { soloPregunta } from './proyectos';
-import { validarCadencia, validarDia, validarHora, validarMuestras } from './validar';
+import { TIPOS_PREGUNTA, validarCadencia, validarDia, validarHora, validarMuestras } from './validar';
 
 type Edicion = Pick<
   Datos,
@@ -9,7 +9,6 @@ type Edicion = Pick<
 >;
 
 const normalizar = (t: string) => t.replace(/\s+/g, ' ').trim();
-const TIPOS = ['descubrimiento', 'comparativa', 'marca'];
 const ESTADOS = ['activo', 'pausado', 'archivado'];
 
 export function crearEdicion(ctx: Contexto): Edicion {
@@ -136,7 +135,7 @@ export function crearEdicion(ctx: Contexto): Edicion {
     agregarPregunta: (proyectoId, p) =>
       ctx.escribir(() => {
         const proyecto = exigirEdicion(proyectoId);
-        if (!TIPOS.includes(p.tipo)) throw invalido('El tipo de pregunta no es válido.');
+        if (!TIPOS_PREGUNTA.includes(p.tipo)) throw invalido('El tipo de pregunta no es válido.');
         const texto = normalizar(p.texto ?? '');
         if (texto === '') throw invalido('Escribe el texto de la pregunta.');
         const usados = estado.preguntas

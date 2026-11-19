@@ -1,6 +1,7 @@
 import { invalido } from './contexto';
 
 const HORA = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+export const TIPOS_PREGUNTA: string[] = ['descubrimiento', 'comparativa', 'marca'];
 const CADENCIAS = ['semanal', 'quincenal', 'manual'];
 
 const entero = (v: unknown, min: number, max: number) => typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max;
