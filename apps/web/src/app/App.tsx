@@ -4,7 +4,8 @@ import { PantallaAcceso } from '../sesion/PantallaAcceso';
 import { useSesion } from '../sesion/useSesion';
 
 function Inicio() {
-  const { perfil, salir } = useSesion();
+  const { perfil, cargando, salir } = useSesion();
+  if (cargando) return <p role="status" className="p-e6">Cargando…</p>;
   if (!perfil) return <PantallaAcceso />;
   return (
     <nav aria-label="Principal">

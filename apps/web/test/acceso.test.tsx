@@ -9,7 +9,8 @@ import { renderConDatos } from './ayudas/render';
 const datos = () => crearDatosEnMemoria({ usuarios: [{ correo: 'ana@reset.com.pe', clave: 'secreta123' }] });
 async function intentar(correo: string, clave: string) {
   const u = userEvent.setup();
-  if (correo) await u.type(screen.getByLabelText('Correo'), correo);
+  const campoCorreo = await screen.findByLabelText('Correo');
+  if (correo) await u.type(campoCorreo, correo);
   if (clave) await u.type(screen.getByLabelText('Contraseña'), clave);
   await u.click(screen.getByRole('button', { name: 'Entrar' }));
 }
@@ -34,6 +35,7 @@ describe('pantalla de acceso', () => {
   });
   it('¿La olvidaste? pide el correo primero', async () => {
     renderConDatos(<App />, { datos: datos() });
+    await screen.findByLabelText('Correo');
     await userEvent.click(screen.getByRole('button', { name: '¿La olvidaste?' }));
     expect(await screen.findByText('Escribe tu correo arriba y vuelve a tocar «¿La olvidaste?».')).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Correo'), 'ana@reset.com.pe');
@@ -56,6 +58,26 @@ describe('pantalla de acceso', () => {
     await intentar('ana@reset.com.pe', 'secreta123');
     expect(
       await screen.findByText('No pudimos entrar, y no es tu contraseña: falló la conexión con el servidor. Vuelve a intentar en un momento.'),
+    ).toBeInTheDocument();
+  });
+  it('con sesión abierta no muestra nunca el acceso', async () => {
+    const d = datos();
+    d.estado.sesion = 'ana@reset.com.pe';
+    renderConDatos(<App />, { datos: d });
+    expect(screen.queryByLabelText('Correo')).not.toBeInTheDocument();
+    expect(await screen.findByRole('navigation')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Correo')).not.toBeInTheDocument();
+  });
+  it('si falla la conexión al pedir el enlace, lo dice con su propio texto', async () => {
+    const d = datos();
+    d.pedirRecuperacion = async () => {
+      throw new ErrorDatos('conexion', 'x');
+    };
+    renderConDatos(<App />, { datos: d });
+    await userEvent.type(await screen.findByLabelText('Correo'), 'ana@reset.com.pe');
+    await userEvent.click(screen.getByRole('button', { name: '¿La olvidaste?' }));
+    expect(
+      await screen.findByText('No pudimos pedir el enlace: falló la conexión con el servidor. Vuelve a intentar en un momento.'),
     ).toBeInTheDocument();
   });
 });

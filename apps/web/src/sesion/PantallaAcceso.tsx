@@ -8,14 +8,17 @@ import { useSesion } from './useSesion';
 const TEXTO_CONEXION =
   'No pudimos entrar, y no es tu contraseña: falló la conexión con el servidor. Vuelve a intentar en un momento.';
 
-function textoDeError(error: unknown): string {
+const TEXTO_CONEXION_RECUPERACION =
+  'No pudimos pedir el enlace: falló la conexión con el servidor. Vuelve a intentar en un momento.';
+
+function textoDeError(error: unknown, conexion = TEXTO_CONEXION): string {
   if (error instanceof ErrorDatos) {
     if (error.codigo === 'correo_no_permitido') return 'Usa tu correo de Reset o Wanted.';
     if (error.codigo === 'credenciales') return 'El correo o la contraseña no coinciden.';
-    if (error.codigo === 'conexion') return TEXTO_CONEXION;
+    if (error.codigo === 'conexion') return conexion;
     return error.message;
   }
-  return TEXTO_CONEXION;
+  return conexion;
 }
 
 export function PantallaAcceso() {
@@ -26,6 +29,7 @@ export function PantallaAcceso() {
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [pidiendo, setPidiendo] = useState(false);
 
   async function alEnviar(e: FormEvent) {
     e.preventDefault();
@@ -48,11 +52,14 @@ export function PantallaAcceso() {
     if (!correo.trim()) return setError('Escribe tu correo arriba y vuelve a tocar «¿La olvidaste?».');
     if (!esCorreoPermitido(correo)) return setError('Usa tu correo de Reset o Wanted.');
     setError(null);
+    setPidiendo(true);
     try {
       await datos.pedirRecuperacion(correo);
       setAviso(`Si ${correo.trim()} tiene cuenta, le llega un enlace para volver a entrar.`);
     } catch (falla) {
-      setError(textoDeError(falla));
+      setError(textoDeError(falla, TEXTO_CONEXION_RECUPERACION));
+    } finally {
+      setPidiendo(false);
     }
   }
 
@@ -76,7 +83,7 @@ export function PantallaAcceso() {
             <label htmlFor="clave" className="text-(length:--t-14) font-semibold">
               Contraseña
             </label>
-            <button type="button" onClick={alOlvidar} className="text-(length:--t-14) text-tinta-2 underline">
+            <button type="button" onClick={alOlvidar} disabled={pidiendo} className="text-(length:--t-14) text-tinta-2 underline disabled:opacity-60">
               ¿La olvidaste?
             </button>
           </div>
