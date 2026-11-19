@@ -53,6 +53,27 @@ describe('catálogo de marcas', () => {
     expect(screen.getByText('UP')).toBeInTheDocument();
     expect(d.estado.marcas[0]!.dominios).toEqual(['up.edu.pe', 'pacifico.edu.pe']);
   });
+  it('el error de un alias aparece junto a esa fila y no junto al nombre', async () => {
+    const d = admin(sectorConMarcas('Calzado', [{ nombre: 'Calzado Uno', alias: ['Bata Kids'] }]));
+    renderConDatos(<Catalogo />, { datos: d, ruta: `/sectores/${d.estado.sectores[0]!.id}`, patron: PATRON });
+    await userEvent.click(await screen.findByRole('button', { name: 'Agregar marca' }));
+    await userEvent.type(screen.getByLabelText('Nombre'), 'Bata');
+    await userEvent.click(screen.getByRole('button', { name: 'Agregar un alias' }));
+    await userEvent.type(screen.getByLabelText('Alias 1'), 'Bata Kids');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    const aviso = await screen.findByText('«Bata Kids» ya es de Calzado Uno');
+    expect(aviso.closest('li')).toContainElement(screen.getByLabelText('Alias 1'));
+  });
+  it('el error del nombre aparece junto al nombre', async () => {
+    const d = admin(sectorConMarcas('Calzado', [{ nombre: 'Calzado Uno', alias: ['Bata Kids'] }]));
+    renderConDatos(<Catalogo />, { datos: d, ruta: `/sectores/${d.estado.sectores[0]!.id}`, patron: PATRON });
+    await userEvent.click(await screen.findByRole('button', { name: 'Agregar marca' }));
+    await userEvent.type(screen.getByLabelText('Nombre'), 'Bata Kids');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    const aviso = await screen.findByText('«Bata Kids» ya es de Calzado Uno');
+    expect(aviso.closest('li')).toBeNull();
+    expect(aviso.previousElementSibling).toContainElement(screen.getByLabelText('Nombre'));
+  });
   it('el admin quita un alias', async () => {
     const d = admin(sectorConMarcas('Educación', [{ nombre: 'ESAN', alias: ['Esan Perú'] }]));
     renderConDatos(<Catalogo />, { datos: d, ruta: `/sectores/${d.estado.sectores[0]!.id}`, patron: PATRON });

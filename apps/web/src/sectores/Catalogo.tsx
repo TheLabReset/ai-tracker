@@ -36,7 +36,7 @@ function FormularioMarca({ sectorId, alCerrar }: { sectorId: string; alCerrar: (
   const [nombre, setNombre] = useState<TerminoEditable>(VACIO);
   const [alias, setAlias] = useState<TerminoEditable[]>([]);
   const [dominios, setDominios] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ texto: string; campo: 'nombre' | number | null } | null>(null);
 
   const crear = useMutation({
     mutationFn: () =>
@@ -50,7 +50,13 @@ function FormularioMarca({ sectorId, alCerrar }: { sectorId: string; alCerrar: (
       await cliente.invalidateQueries({ queryKey: ['sectores', sectorId, 'marcas'] });
       alCerrar();
     },
-    onError: (falla) => setError(mensajeDe(falla, 'No pudimos guardar la marca. Inténtalo de nuevo.')),
+    onError: (falla) => {
+      const texto = mensajeDe(falla, 'No pudimos guardar la marca. Inténtalo de nuevo.');
+      const esColision = falla instanceof ErrorDatos && falla.codigo === 'colision_alias';
+      const empieza = (t: string) => texto.startsWith(`«${t.trim()}» `);
+      const fila = alias.findIndex((a) => a.texto.trim() !== '' && empieza(a.texto));
+      setError({ texto, campo: !esColision ? null : empieza(nombre.texto) ? 'nombre' : fila >= 0 ? fila : null });
+    },
   });
 
   function alEnviar(e: FormEvent) {
@@ -59,19 +65,17 @@ function FormularioMarca({ sectorId, alCerrar }: { sectorId: string; alCerrar: (
     crear.mutate();
   }
 
-  const errorEnNombre = error !== null && error.startsWith(`«${nombre.texto.trim()}»`);
-
   return (
     <form onSubmit={alEnviar} noValidate className="flex max-w-[26rem] flex-col gap-e4 rounded-card bg-capsula p-e6">
       <h2 className="font-display text-(length:--t-26) uppercase">Agregar marca</h2>
       <CampoTermino etiquetaTexto="Nombre" etiquetaAmbiguo="Ambiguo" valor={nombre} onCambio={setNombre} />
-      <MensajeError texto={errorEnNombre ? error : null} />
-      <CampoAlias valor={alias} onCambio={setAlias} />
-      <MensajeError texto={error !== null && !errorEnNombre ? error : null} />
+      <MensajeError texto={error?.campo === 'nombre' ? error.texto : null} />
+      <CampoAlias valor={alias} onCambio={setAlias} errores={alias.map((_, i) => (error?.campo === i ? error.texto : null))} />
       <label className="flex flex-col gap-e2 text-(length:--t-14) font-semibold">
         Dominios
         <input type="text" value={dominios} onChange={(e) => setDominios(e.target.value)} placeholder="marca.pe, marca.com" className={estiloCampo} />
       </label>
+      <MensajeError texto={error && error.campo === null ? error.texto : null} />
       <div className="flex gap-e4">
         <button type="submit" disabled={nombre.texto.trim() === '' || crear.isPending} aria-busy={crear.isPending} className={estiloBotonMod}>
           Guardar

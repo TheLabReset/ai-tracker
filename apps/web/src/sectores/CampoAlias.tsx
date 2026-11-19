@@ -56,12 +56,17 @@ export function CampoTermino({ etiquetaTexto, etiquetaAmbiguo, valor, onCambio }
   );
 }
 
-function FilaAlias({ indice, valor, onCambio, onQuitar }: { indice: number; valor: TerminoEditable; onCambio: (n: TerminoEditable) => void; onQuitar: () => void }) {
+function FilaAlias({ indice, valor, error, onCambio, onQuitar }: { indice: number; error: string | null; valor: TerminoEditable; onCambio: (n: TerminoEditable) => void; onQuitar: () => void }) {
   const { cambiarTexto, cambiarAmbiguo } = useAmbiguoAutomatico(valor, onCambio);
   return (
     <li className="flex flex-col gap-e2 rounded-card bg-capsula p-e4">
       <input type="text" aria-label={`Alias ${indice + 1}`} value={valor.texto} onChange={(e) => cambiarTexto(e.target.value)} className={estiloCampo} />
       {avisaAmbiguo(valor) && <AvisoAmbiguo termino={valor.texto} />}
+      {error && (
+        <p role="alert" className="text-(length:--t-14) text-error">
+          {error}
+        </p>
+      )}
       <div className="flex items-center justify-between gap-e4">
         <label className="flex items-center gap-e2 text-(length:--t-14) font-semibold">
           <input type="checkbox" aria-label={`Ambiguo del alias ${indice + 1}`} checked={valor.ambiguo} onChange={(e) => cambiarAmbiguo(e.target.checked)} />
@@ -75,7 +80,7 @@ function FilaAlias({ indice, valor, onCambio, onQuitar }: { indice: number; valo
   );
 }
 
-export function CampoAlias({ valor, onCambio }: { valor: TerminoEditable[]; onCambio: (nuevo: TerminoEditable[]) => void }) {
+export function CampoAlias({ valor, onCambio, errores = [] }: { valor: TerminoEditable[]; onCambio: (nuevo: TerminoEditable[]) => void; errores?: Array<string | null> }) {
   return (
     <fieldset className="flex flex-col gap-e2">
       <legend className="text-(length:--t-14) font-semibold">Alias</legend>
@@ -86,6 +91,7 @@ export function CampoAlias({ valor, onCambio }: { valor: TerminoEditable[]; onCa
               key={i}
               indice={i}
               valor={a}
+              error={errores[i] ?? null}
               onCambio={(n) => onCambio(valor.map((x, j) => (j === i ? n : x)))}
               onQuitar={() => onCambio(valor.filter((_, j) => j !== i))}
             />
