@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router';
 import { estiloBotonLinea, estiloBotonMod } from '../app/estilos';
+import { normalizarDominios } from '../app/dominios';
 import { puedeCrearMarcas } from '../app/guardas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
@@ -11,14 +12,6 @@ import { Plantillas } from './Plantillas';
 import { CampoAlias, CampoTermino, type TerminoEditable } from './CampoAlias';
 
 const VACIO: TerminoEditable = { texto: '', ambiguo: false };
-
-export function normalizarDominios(texto: string): string[] {
-  const limpios = texto
-    .split(',')
-    .map((d) => d.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/[/?#].*$/, ''))
-    .filter((d) => d !== '');
-  return [...new Set(limpios)];
-}
 
 const mensajeDe = (falla: unknown, generico: string) => (falla instanceof ErrorDatos ? falla.message : generico);
 

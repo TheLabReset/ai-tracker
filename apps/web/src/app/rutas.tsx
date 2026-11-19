@@ -4,6 +4,7 @@ import { Link, Route, Routes } from 'react-router';
 import { Bitacora } from '../admin/Bitacora';
 import { Motores } from '../admin/Motores';
 import { Usuarios } from '../admin/Usuarios';
+import { Asistente } from '../marcas/alta/Asistente';
 import { Catalogo } from '../sectores/Catalogo';
 import { Sectores } from '../sectores/Sectores';
 import { CrearClave } from '../sesion/CrearClave';
@@ -59,7 +60,7 @@ export function RutasInternas() {
       <Route path="/" element={<Consolidado />} />
       <Route path="/sectores" element={<Sectores />} />
       <Route path="/sectores/:sectorId" element={<Catalogo />} />
-      <Route path="/marcas/nueva" element={<Pantalla titulo="Nueva marca" />} />
+      <Route path="/marcas/nueva" element={<Asistente />} />
       <Route path="/marcas/:proyectoId/configuracion" element={<Pantalla titulo="Configuración de la marca" />} />
       <Route path="/admin/motores" element={<SoloAdmin><Motores /></SoloAdmin>} />
       <Route path="/admin/usuarios" element={<SoloAdmin><Usuarios /></SoloAdmin>} />
