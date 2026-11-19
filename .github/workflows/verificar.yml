@@ -33,8 +33,14 @@ jobs:
       - name: Levantar Supabase local
         run: pnpm exec supabase start -x studio,imgproxy,realtime,storage-api,postgres-meta,edge-runtime,logflare,vector,supavisor
 
+      # Reintenta porque los espejos de Ubuntu a veces fallan
       - name: Instalar Chromium para Playwright
-        run: pnpm -C apps/web exec playwright install --with-deps chromium
+        run: |
+          for intento in 1 2 3; do
+            pnpm -C apps/web exec playwright install --with-deps chromium && exit 0
+            sleep 30
+          done
+          exit 1
 
       - name: Verificar
         run: pnpm verificar
