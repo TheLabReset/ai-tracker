@@ -1,15 +1,16 @@
+import reset from './logos/reset.png';
+import wanted from './logos/wanted.png';
+
 const marcas = [
-  { nombre: 'Reset', texto: 'RESET' },
-  { nombre: 'Wanted', texto: 'WANTED' },
+  { nombre: 'Reset', src: reset },
+  { nombre: 'Wanted', src: wanted },
 ];
 
 export function Logos() {
   return (
     <div className="flex items-center gap-e6">
       {marcas.map((m) => (
-        <span key={m.nombre} aria-label={`Logo de ${m.nombre}`} role="img" className="font-display text-(length:--t-20) tracking-(--espaciado-display)">
-          {m.texto}
-        </span>
+        <img key={m.nombre} src={m.src} alt={`Logo de ${m.nombre}`} className="h-12 w-auto" />
       ))}
     </div>
   );
