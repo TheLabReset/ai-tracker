@@ -1,27 +1,19 @@
-import { Route, Routes } from 'react-router';
-import { CrearClave } from '../sesion/CrearClave';
+import { Shell } from '../shell/Shell';
 import { PantallaAcceso } from '../sesion/PantallaAcceso';
 import { useSesion } from '../sesion/useSesion';
+import { Rutas, RutasInternas } from './rutas';
 
-function Inicio() {
-  const { perfil, cargando, salir } = useSesion();
+function ConSesion() {
+  const { perfil, cargando } = useSesion();
   if (cargando) return <p role="status" className="p-e6">Cargando…</p>;
   if (!perfil) return <PantallaAcceso />;
   return (
-    <nav aria-label="Principal">
-      <h1>The Lab AI Tracker</h1>
-      <button type="button" onClick={salir}>
-        Salir
-      </button>
-    </nav>
+    <Shell perfil={perfil}>
+      <RutasInternas />
+    </Shell>
   );
 }
 
 export function App() {
-  return (
-    <Routes>
-      <Route path="/crear-password" element={<CrearClave />} />
-      <Route path="*" element={<Inicio />} />
-    </Routes>
-  );
+  return <Rutas conSesion={<ConSesion />} />;
 }
