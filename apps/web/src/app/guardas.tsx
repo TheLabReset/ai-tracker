@@ -11,3 +11,7 @@ export function SoloAdmin({ children }: { children: ReactNode }) {
   if (!perfil?.esAdmin) return <p className="p-e6 text-tinta-2">Esta sección es de The Lab.</p>;
   return <>{children}</>;
 }
+
+export function puedeEditarMarca(perfil: Perfil, marcaId: string): boolean {
+  return perfil.esAdmin || perfil.membresias.some((m) => m.marcaId === marcaId && m.rol === 'lider');
+}
