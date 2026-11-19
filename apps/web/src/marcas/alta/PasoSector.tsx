@@ -74,7 +74,9 @@ export function PasoSector({ borrador, despachar }: PropsPaso) {
             Sector
             <select
               value={sector && 'id' in sector ? sector.id : ''}
-              onChange={(e) => despachar(e.target.value === '' ? { tipo: 'sinSector' } : { tipo: 'sectorExistente', id: e.target.value })}
+              onChange={(e) =>
+                despachar(e.target.value === '' ? { tipo: 'sinSector' } : { tipo: 'sectorExistente', id: e.target.value, categoria: sectores.data?.find((s) => s.id === e.target.value)?.categoria })
+              }
               className={estiloCampo}
             >
               <option value="">Elige un sector</option>

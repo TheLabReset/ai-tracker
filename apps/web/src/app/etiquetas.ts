@@ -1,4 +1,5 @@
 import type { EstadoProyecto, RolMarca } from '@lab/datos';
+import type { TipoPregunta } from '@lab/nucleo';
 
 export const ETIQUETA_ROL: Record<RolMarca, string> = {
   lider: 'Líder',
@@ -14,6 +15,8 @@ export const ETIQUETA_ESTADO: Record<EstadoProyecto, string> = {
   pausado: 'Pausado',
   archivado: 'Archivado',
 };
+
+export const ETIQUETA_TIPO: Record<TipoPregunta, string> = { descubrimiento: 'Descubrimiento', comparativa: 'Comparativa', marca: 'Marca' };
 
 export const ETIQUETA_EMPRESA = { reset: 'Reset', wanted: 'Wanted' } as const;
 

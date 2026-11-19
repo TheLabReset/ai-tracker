@@ -3,12 +3,12 @@ import { ErrorVariableFaltante, llavesMalformadas, renderizarPlantilla, variable
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { estiloBotonLinea, estiloBotonMod } from '../app/estilos';
+import { ETIQUETA_TIPO } from '../app/etiquetas';
 import { puedeCrearMarcas } from '../app/guardas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
 import { useSesion } from '../sesion/useSesion';
 
-const ETIQUETA_TIPO: Record<TipoPregunta, string> = { descubrimiento: 'Descubrimiento', comparativa: 'Comparativa', marca: 'Marca' };
 const TIPOS = Object.keys(ETIQUETA_TIPO) as TipoPregunta[];
 const CODIGO_VALIDO = /^[A-Z0-9]+$/;
 

@@ -6,7 +6,10 @@ import { puedeCrearMarcas } from '../../app/guardas';
 import { useDatos } from '../../app/proveedores';
 import { useSesion } from '../../sesion/useSesion';
 import { aplicar, borradorInicial, erroresDelPaso, PASOS } from './borrador';
+import { PasoCompetidores } from './PasoCompetidores';
+import { PasoExploracion } from './PasoExploracion';
 import { PasoMarca } from './PasoMarca';
+import { PasoPreguntas } from './PasoPreguntas';
 import { PasoSector } from './PasoSector';
 import type { PropsPaso } from './tipos';
 
@@ -14,7 +17,7 @@ function PasoPendiente(_: PropsPaso) {
   return <p className="text-tinta-2">Este paso llega pronto.</p>;
 }
 
-const COMPONENTES: Array<ComponentType<PropsPaso>> = [PasoMarca, PasoSector, PasoPendiente, PasoPendiente, PasoPendiente, PasoPendiente, PasoPendiente];
+const COMPONENTES: Array<ComponentType<PropsPaso>> = [PasoMarca, PasoSector, PasoExploracion, PasoCompetidores, PasoPreguntas, PasoPendiente, PasoPendiente];
 
 function Asistido({ perfil }: { perfil: Perfil }) {
   const datos = useDatos();
