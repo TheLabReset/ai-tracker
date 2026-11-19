@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { App } from '../src/app/App';
@@ -10,6 +11,50 @@ const conSesion = (admin: boolean) => {
   d.estado.sesion = 'ana@reset.com.pe';
   return d;
 };
+
+async function anaConProyecto() {
+  const base = crearDatosEnMemoria({
+    usuarios: [
+      { correo: 'ana@reset.com.pe', clave: 'x', admin: true },
+      { correo: 'beto@reset.com.pe', clave: 'y' },
+    ],
+  });
+  base.estado.sesion = 'ana@reset.com.pe';
+  const sector = await base.crearSector({ nombre: 'Seguros', categoria: 'seguros' });
+  const rival = await base.crearMarca(sector.id, { nombre: 'Rimac', ambiguo: false, alias: [], dominios: [] });
+  const motor = (await base.listarMotores())[0]!.id;
+  await base.crearProyecto({
+    marca: { nombre: 'Interseguro', ambiguo: false, alias: [], dominios: [], empresaId: 'reset' },
+    sector: { id: sector.id },
+    categoriasExtra: [],
+    competidores: [{ id: rival.id }],
+    competidorPrincipal: 0,
+    preguntas: [{ codigo: 'P1', tipo: 'descubrimiento', set: 'compat', categoria: null, texto: '¿Qué seguro me recomiendas?' }],
+    motorIds: [motor],
+    cadencia: 'semanal',
+    diaSemana: 3,
+    hora: '07:00',
+    muestras: 3,
+    topeGastoMensual: null,
+  });
+  let soltar: () => void = () => {};
+  let retenido = false;
+  const datos = {
+    ...base,
+    listarProyectos: async () => {
+      const visibles = await base.listarProyectos();
+      if (retenido) await new Promise<void>((r) => (soltar = r));
+      return visibles;
+    },
+  };
+  return { base, datos, retener: () => (retenido = true), soltar: () => soltar() };
+}
+
+async function entrarComo(correo: string, clave: string) {
+  await userEvent.type(await screen.findByLabelText('Correo'), correo);
+  await userEvent.type(screen.getByLabelText('Contraseña'), clave);
+  await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+}
 
 describe('shell', () => {
   it('el admin ve Admin en el menú; los demás no', async () => {
@@ -90,50 +135,34 @@ describe('shell', () => {
   });
 
   it('al salir se borra la caché: el siguiente usuario no ve los proyectos del anterior', async () => {
-    const base = crearDatosEnMemoria({
-      usuarios: [
-        { correo: 'ana@reset.com.pe', clave: 'x', admin: true },
-        { correo: 'beto@reset.com.pe', clave: 'y' },
-      ],
-    });
-    base.estado.sesion = 'ana@reset.com.pe';
-    const sector = await base.crearSector({ nombre: 'Seguros', categoria: 'seguros' });
-    const rival = await base.crearMarca(sector.id, { nombre: 'Rimac', ambiguo: false, alias: [], dominios: [] });
-    const motor = (await base.listarMotores())[0]!.id;
-    await base.crearProyecto({
-      marca: { nombre: 'Interseguro', ambiguo: false, alias: [], dominios: [], empresaId: 'reset' },
-      sector: { id: sector.id },
-      categoriasExtra: [],
-      competidores: [{ id: rival.id }],
-      competidorPrincipal: 0,
-      preguntas: [{ codigo: 'P1', tipo: 'descubrimiento', set: 'compat', categoria: null, texto: '¿Qué seguro me recomiendas?' }],
-      motorIds: [motor],
-      cadencia: 'semanal',
-      diaSemana: 3,
-      hora: '07:00',
-      muestras: 3,
-      topeGastoMensual: null,
-    });
-    let soltar: () => void = () => {};
-    let retener = false;
-    const datos = {
-      ...base,
-      listarProyectos: async () => {
-        const visibles = await base.listarProyectos();
-        if (retener) await new Promise<void>((r) => (soltar = r));
-        return visibles;
-      },
-    };
+    const { datos, retener, soltar } = await anaConProyecto();
     renderConDatos(<App />, { datos });
     expect(await screen.findByRole('heading', { name: 'Consolidado' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /ana/i }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Salir' }));
-    retener = true;
-    await userEvent.type(await screen.findByLabelText('Correo'), 'beto@reset.com.pe');
-    await userEvent.type(screen.getByLabelText('Contraseña'), 'y');
-    await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+    retener();
+    await entrarComo('beto@reset.com.pe', 'y');
     expect(await screen.findByRole('button', { name: /beto/i })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Consolidado' })).toBeNull();
+    soltar();
+    expect(await screen.findByText(/todavía no tienes marcas/i)).toBeInTheDocument();
+  });
+
+  it('si la sesión termina sin Salir, quien entra después tampoco ve los proyectos del anterior', async () => {
+    const { base, datos, retener, soltar } = await anaConProyecto();
+    let cliente: QueryClient | undefined;
+    function Sonda() {
+      cliente = useQueryClient();
+      return null;
+    }
+    renderConDatos(<><Sonda /><App /></>, { datos });
+    expect(await screen.findByRole('link', { name: 'Interseguro' })).toBeInTheDocument();
+    base.estado.sesion = null;
+    await act(() => cliente!.invalidateQueries({ queryKey: ['sesion'] }));
+    retener();
+    await entrarComo('beto@reset.com.pe', 'y');
+    expect(await screen.findByRole('button', { name: /beto/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Interseguro' })).toBeNull();
     soltar();
     expect(await screen.findByText(/todavía no tienes marcas/i)).toBeInTheDocument();
   });

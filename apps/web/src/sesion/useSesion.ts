@@ -9,15 +9,19 @@ export function useSesion() {
   const cliente = useQueryClient();
   const consulta = useQuery({ queryKey: CLAVE_SESION, queryFn: () => datos.sesionActual() });
 
+  const olvidarDatos = () => cliente.removeQueries({ predicate: (q) => q.queryKey[0] !== CLAVE_SESION[0] });
+
   return {
     perfil: (consulta.data ?? null) as Perfil | null,
     cargando: consulta.isPending,
     async entrar(correo: string, clave: string) {
-      cliente.setQueryData(CLAVE_SESION, await datos.entrar(correo, clave));
+      const perfil = await datos.entrar(correo, clave);
+      olvidarDatos();
+      cliente.setQueryData(CLAVE_SESION, perfil);
     },
     async salir() {
       await datos.salir();
-      cliente.removeQueries({ predicate: (q) => q.queryKey[0] !== CLAVE_SESION[0] });
+      olvidarDatos();
       cliente.setQueryData(CLAVE_SESION, null);
     },
   };
