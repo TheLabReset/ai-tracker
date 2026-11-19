@@ -11,8 +11,9 @@ function datosBase() {
       { correo: 'admin@reset.com.pe', clave: 'x', admin: true },
       { correo: 'luis@wanted.pe', clave: 'x' },
     ],
-    ...sectorConMarcas('Calzado', ['Bata']),
+    ...sectorConMarcas('Calzado', ['Bata', 'Footloose']),
   });
+  d.estado.marcas.find((m) => m.nombre === 'Bata')!.esCliente = true;
   d.estado.sesion = 'admin@reset.com.pe';
   return d;
 }
@@ -30,6 +31,15 @@ describe('admin · usuarios', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(await within(fila).findByText('Bata · Responsable')).toBeInTheDocument();
     expect(within(fila).getByText('Wanted')).toBeInTheDocument();
+  });
+
+  it('solo ofrece marcas cliente, no competidores', async () => {
+    renderConDatos(<Usuarios />, { datos: datosBase() });
+    const fila = (await screen.findByRole('cell', { name: 'luis@wanted.pe' })).closest('tr')!;
+    await userEvent.click(within(fila).getByRole('button', { name: 'Dar acceso' }));
+    await userEvent.selectOptions(screen.getByLabelText('Sector'), 'Calzado');
+    await screen.findByRole('option', { name: 'Bata' });
+    expect(within(screen.getByLabelText('Marca')).getAllByRole('option').map((o) => o.textContent)).toEqual(['Elige una marca', 'Bata']);
   });
 
   it('quita una marca con su botón', async () => {

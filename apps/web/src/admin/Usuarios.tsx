@@ -21,10 +21,11 @@ function FormularioAcceso({ usuario, alCerrar }: { usuario: UsuarioListado; alCe
 
   const sectores = useQuery({ queryKey: ['sectores'], queryFn: () => datos.listarSectores() });
   const marcas = useQuery({
-    queryKey: ['marcas', sectorId],
+    queryKey: ['sectores', sectorId, 'marcas'],
     queryFn: () => datos.listarMarcas(sectorId),
     enabled: sectorId !== '',
   });
+  const clientes = (marcas.data ?? []).filter((m) => m.esCliente);
 
   const guardar = useMutation({
     mutationFn: (r: RolMarca) => datos.asignarMembresia(usuario.id, marcaId, r),
@@ -67,7 +68,7 @@ function FormularioAcceso({ usuario, alCerrar }: { usuario: UsuarioListado; alCe
         Marca
         <select value={marcaId} onChange={(e) => setMarcaId(e.target.value)} disabled={sectorId === ''} className={estiloCampo}>
           <option value="">Elige una marca</option>
-          {(marcas.data ?? []).map((m) => (
+          {clientes.map((m) => (
             <option key={m.id} value={m.id}>
               {m.nombre}
             </option>
