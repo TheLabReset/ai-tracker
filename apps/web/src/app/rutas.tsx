@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { Link, Route, Routes } from 'react-router';
+import { Consolidado } from '../consolidado/Consolidado';
 import { Bitacora } from '../admin/Bitacora';
 import { Motores } from '../admin/Motores';
 import { Usuarios } from '../admin/Usuarios';
@@ -9,41 +9,8 @@ import { Asistente } from '../marcas/alta/Asistente';
 import { Catalogo } from '../sectores/Catalogo';
 import { Sectores } from '../sectores/Sectores';
 import { CrearClave } from '../sesion/CrearClave';
-import { useSesion } from '../sesion/useSesion';
 import { AvisoDeNavegacion } from './AvisoDeNavegacion';
-import { puedeCrearMarcas, SoloAdmin } from './guardas';
-import { useDatos } from './proveedores';
-
-function Pantalla({ titulo }: { titulo: string }) {
-  return <h1 className="font-display text-(length:--t-40) uppercase">{titulo}</h1>;
-}
-
-function Consolidado() {
-  const datos = useDatos();
-  const { perfil } = useSesion();
-  const proyectos = useQuery({ queryKey: ['proyectos'], queryFn: () => datos.listarProyectos() });
-  if (proyectos.isPending) return <p role="status">Cargando…</p>;
-  if (proyectos.isError)
-    return (
-      <div role="alert" className="flex flex-col items-start gap-e4 py-e8">
-        <p className="text-error">No pudimos cargar tus marcas.</p>
-        <button type="button" onClick={() => proyectos.refetch()} className="rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta">
-          Reintentar
-        </button>
-      </div>
-    );
-  if (proyectos.data && proyectos.data.length > 0) return <Pantalla titulo="Consolidado" />;
-  return (
-    <div className="flex flex-col items-start gap-e4 py-e8">
-      <p className="text-(length:--t-16)">Todavía no tienes marcas asignadas. Pídele acceso a The Lab.</p>
-      {perfil && puedeCrearMarcas(perfil) && (
-        <Link to="/marcas/nueva" className="rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta">
-          Nueva marca
-        </Link>
-      )}
-    </div>
-  );
-}
+import { SoloAdmin } from './guardas';
 
 function NoEncontrada() {
   return (
