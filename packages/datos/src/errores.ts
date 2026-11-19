@@ -25,6 +25,7 @@ const esDeRed = (e: ErrorCrudo) =>
 function textoDuplicado(mensaje: string): string {
   if (mensaje.includes('sectores_nombre_key')) return 'Ya existe un sector con ese nombre.';
   if (mensaje.includes('marcas_sector_id_clave_key')) return 'Ya hay una marca con ese nombre en el sector.';
+  if (mensaje.includes('plantillas_sector_id_codigo_key')) return 'Ya hay una plantilla con ese código.';
   return 'Ese dato ya existe.';
 }
 

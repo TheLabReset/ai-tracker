@@ -10,6 +10,7 @@ export {
   type Motor,
   type NuevaMarca,
   type Perfil,
+  type Plantilla,
   type RolMarca,
   type Sector,
   type UsuarioListado,

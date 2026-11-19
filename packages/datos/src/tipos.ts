@@ -1,3 +1,5 @@
+import type { TipoPregunta } from '@lab/nucleo';
+
 export type RolMarca = 'lider' | 'responsable' | 'planning' | 'lector';
 
 export type CodigoError =
@@ -86,6 +88,14 @@ export interface CambioMotor {
   vigenteHasta: string;
 }
 
+export interface Plantilla {
+  id: string;
+  codigo: string;
+  sectorId: string | null;
+  tipo: TipoPregunta;
+  texto: string;
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -109,4 +119,6 @@ export interface Datos {
     cambios: Partial<Pick<Motor, 'modelo' | 'busquedaWeb' | 'costoEstimado' | 'activo'>>,
   ): Promise<Motor>;
   historialMotor(id: string): Promise<CambioMotor[]>;
+  listarPlantillas(sectorId?: string): Promise<Plantilla[]>;
+  crearPlantilla(p: { codigo: string; sectorId: string; tipo: TipoPregunta; texto: string }): Promise<Plantilla>;
 }

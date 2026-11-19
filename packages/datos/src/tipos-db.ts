@@ -139,6 +139,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"plantillas": {
+                  Row: {
+                    "codigo": string,"id": string,"sector_id": string | null,"texto": string,"tipo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "codigo": string,"id"?: string,"sector_id"?: string | null,"texto": string,"tipo": string
+                  }
+                  Update: {
+                    "codigo"?: string,"id"?: string,"sector_id"?: string | null,"texto"?: string,"tipo"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "plantillas_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"sectores": {
                   Row: {
                     "categoria": string,"id": string,"idioma": string,"nombre": string,"pais": string
