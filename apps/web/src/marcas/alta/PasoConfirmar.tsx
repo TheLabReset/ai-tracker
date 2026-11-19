@@ -21,10 +21,13 @@ function Fila({ titulo, children }: { titulo: string; children: React.ReactNode 
   );
 }
 
+const aliasLimpios = (alias: DatosAlta['marca']['alias']) =>
+  alias.map((a) => ({ texto: a.texto.trim(), ambiguo: a.ambiguo })).filter((a) => a.texto !== '');
+
 function armarAlta(b: Borrador, preguntas: DatosAlta['preguntas']): DatosAlta | null {
   if (!b.sector) return null;
   const { preguntasPropias: _propias, ...resto } = b;
-  return { ...resto, sector: b.sector, preguntas };
+  return { ...resto, marca: { ...b.marca, alias: aliasLimpios(b.marca.alias) }, sector: b.sector, preguntas };
 }
 
 export function PasoConfirmar({ borrador }: PropsPaso) {
@@ -54,6 +57,7 @@ export function PasoConfirmar({ borrador }: PropsPaso) {
     return p ? p.nombre || p.correo : vacio;
   };
   const m = borrador.marca;
+  const alias = aliasLimpios(m.alias);
   const conteo = (set: string) => preguntas.filter((p) => p.set === set).length;
   const nombresMotores = (motores.data ?? []).filter((x) => borrador.motorIds.includes(x.id)).map((x) => x.nombre);
   const alta = armarAlta(borrador, preguntas);
@@ -69,7 +73,7 @@ export function PasoConfirmar({ borrador }: PropsPaso) {
       <dl className="flex flex-col gap-e4 rounded-card bg-capsula p-e4">
         <Fila titulo="Marca">
           {m.nombre}
-          {m.alias.length > 0 && <span className="block text-tinta-2">Alias: {m.alias.map((a) => a.texto).join(', ')}</span>}
+          {alias.length > 0 && <span className="block text-tinta-2">Alias: {alias.map((a) => a.texto).join(', ')}</span>}
           {m.dominios.length > 0 && <span className="block text-tinta-2">Dominios: {m.dominios.join(', ')}</span>}
         </Fila>
         <Fila titulo="Empresa">{m.empresaId === 'reset' ? 'Reset' : 'Wanted'}</Fila>

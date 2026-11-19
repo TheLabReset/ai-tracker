@@ -38,6 +38,21 @@ describe('alta de marca · pasos 6 y 7', () => {
     expect(d.estado.proyectos).toHaveLength(1);
     expect(d.estado.proyectos[0]).toMatchObject({ muestras: 3, cadencia: 'semanal', diaSemana: 3, hora: '07:00' });
   });
+  it('un alias en blanco se descarta y el alta se crea igual', async () => {
+    const d = conPrecios();
+    renderConDatos(<App />, { datos: d, ruta: '/marcas/nueva' });
+    await userEvent.click(await screen.findByRole('button', { name: 'Agregar un alias' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Agregar un alias' }));
+    await userEvent.type(screen.getByLabelText('Alias 2'), '  Bata Perú  ');
+    await hastaMotores();
+    await userEvent.click(screen.getByRole('button', { name: 'Seguir' }));
+    expect(screen.getByText('Alias: Bata Perú')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Crear y dejar listo para medir' }));
+    expect(await screen.findByText('Listo. La primera vuelta corre cuando esté el motor de ejecución.')).toBeInTheDocument();
+    expect(d.estado.proyectos).toHaveLength(1);
+    const marca = d.estado.marcas.find((m) => m.id === d.estado.proyectos[0]!.marcaId)!;
+    expect(marca.alias.map((a) => a.texto)).toEqual(['Bata Perú']);
+  });
   it('en manual el costo por mes depende de las vueltas y se oculta el día', async () => {
     renderConDatos(<App />, { datos: conPrecios(), ruta: '/marcas/nueva' });
     await hastaMotores();
