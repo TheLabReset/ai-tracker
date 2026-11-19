@@ -39,6 +39,12 @@ export function variablesDesconocidas(texto: string): string[] {
   return [...new Set(variablesDe(texto))].filter((v) => !conocidas.has(v));
 }
 
+/** Fragmentos con llaves que no son un `{nombre}` bien formado, sin repetir y en orden. */
+export function llavesMalformadas(texto: string): string[] {
+  const fragmentos = texto.match(/\{[^{}]*\}?|\}/g) ?? [];
+  return [...new Set(fragmentos.filter((f) => !/^\{\w+\}$/.test(f)))];
+}
+
 export function renderizarPlantilla(texto: string, vars: VariablesPlantilla): string {
   return texto.replace(VARIABLE, (_, nombre: string) => {
     const valor = (vars as Record<string, string | undefined>)[nombre];

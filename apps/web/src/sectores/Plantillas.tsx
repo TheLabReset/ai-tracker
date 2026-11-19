@@ -1,5 +1,5 @@
 import { ErrorDatos, type Plantilla } from '@lab/datos';
-import { ErrorVariableFaltante, renderizarPlantilla, variablesDesconocidas, type TipoPregunta } from '@lab/nucleo';
+import { ErrorVariableFaltante, llavesMalformadas, renderizarPlantilla, variablesDesconocidas, type TipoPregunta } from '@lab/nucleo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { estiloBotonLinea, estiloBotonMod } from '../app/estilos';
@@ -20,7 +20,7 @@ function siguienteCodigo(plantillas: Plantilla[]): string {
 }
 
 function vistaPrevia(texto: string, categoria: string): string | null {
-  if (variablesDesconocidas(texto).length > 0 || /\{\s*\}/.test(texto)) return null;
+  if (variablesDesconocidas(texto).length > 0 || llavesMalformadas(texto).length > 0) return null;
   try {
     return renderizarPlantilla(texto, { categoria, marca: 'Tu marca', competidor: 'Tu competidor', ciudad: 'Lima', pais: 'Perú', necesidad: 'tu necesidad' });
   } catch (falla) {
@@ -46,9 +46,10 @@ function FormularioPlantilla({ sectorId, categoria, plantillas, alCerrar }: { se
     onError: (falla) => setError(falla instanceof ErrorDatos ? falla.message : 'No pudimos guardar la plantilla. Inténtalo de nuevo.'),
   });
 
+  const [malformada] = llavesMalformadas(texto);
   const [desconocida] = variablesDesconocidas(texto);
   const previa = texto.trim() === '' ? null : vistaPrevia(texto, categoria);
-  const invalido = !CODIGO_VALIDO.test(codigo) || texto.trim() === '' || desconocida !== undefined;
+  const invalido = !CODIGO_VALIDO.test(codigo) || texto.trim() === '' || desconocida !== undefined || malformada !== undefined;
 
   function alEnviar(e: FormEvent) {
     e.preventDefault();
@@ -77,7 +78,12 @@ function FormularioPlantilla({ sectorId, categoria, plantillas, alCerrar }: { se
         Texto
         <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={3} className={estiloCampo} />
       </label>
-      {desconocida !== undefined && (
+      {malformada !== undefined && (
+        <p role="alert" className="text-(length:--t-14) text-error">
+          Revisa las llaves: «{malformada}» no es una variable.
+        </p>
+      )}
+      {malformada === undefined && desconocida !== undefined && (
         <p role="alert" className="text-(length:--t-14) text-error">
           La variable {`{${desconocida}}`} no existe
         </p>

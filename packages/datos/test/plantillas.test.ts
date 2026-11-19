@@ -15,6 +15,8 @@ describe('plantillas', () => {
     expect((await admin.datos.listarPlantillas(sector.id)).map((p) => p.codigo)).toEqual(['P1', 'P2', 'P3', 'P4', 'P5', 'N1']);
     await expect(admin.datos.crearPlantilla({ codigo: 'N2', sectorId: sector.id, tipo: 'descubrimiento', texto: '¿Y {precio}?' }))
       .rejects.toMatchObject({ codigo: 'datos_invalidos', message: 'La variable {precio} no existe' });
+    await expect(admin.datos.crearPlantilla({ codigo: 'N3', sectorId: sector.id, tipo: 'descubrimiento', texto: '¿Y {mi-var}?' }))
+      .rejects.toMatchObject({ codigo: 'datos_invalidos', message: 'Revisa las llaves: «{mi-var}» no es una variable.' });
   });
   it('las de un sector no aparecen en otro ni en la lista global', async () => {
     const admin = await usuarioDePrueba({ admin: true });

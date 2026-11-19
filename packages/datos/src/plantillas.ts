@@ -1,4 +1,4 @@
-import { variablesDesconocidas } from '@lab/nucleo';
+import { llavesMalformadas, variablesDesconocidas } from '@lab/nucleo';
 import type { ClienteTracker } from './cliente';
 import { comprobar, comprobarLista, conTraduccion } from './errores';
 import { ErrorDatos, type Datos, type Plantilla } from './tipos';
@@ -24,6 +24,8 @@ export function crearPlantillas(cliente: ClienteTracker): Plantillas {
 
     crearPlantilla: (p) =>
       conTraduccion(async () => {
+        const [malformada] = llavesMalformadas(p.texto);
+        if (malformada) throw new ErrorDatos('datos_invalidos', `Revisa las llaves: «${malformada}» no es una variable.`);
         const [desconocida] = variablesDesconocidas(p.texto);
         if (desconocida) throw new ErrorDatos('datos_invalidos', `La variable {${desconocida}} no existe`);
         return aPlantilla(

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ErrorVariableFaltante, PLANTILLAS_COMPAT, armarSetCompat, armarSetExtendido, renderizarPlantilla, variablesDe, variablesDesconocidas } from '../src/preguntas';
+import { ErrorVariableFaltante, PLANTILLAS_COMPAT, armarSetCompat, armarSetExtendido, renderizarPlantilla, llavesMalformadas, variablesDe, variablesDesconocidas } from '../src/preguntas';
 
 describe('preguntas', () => {
   const pad = { categoria: 'educación ejecutiva', marca: 'Programa de Alta Dirección', competidor: 'Pacífico Business School' };
@@ -33,5 +33,11 @@ describe('set extendido y variables', () => {
   it('lista las variables que no son de la plantilla', () => {
     expect(variablesDesconocidas('¿Qué {categoria} para {distrito} y {distrito} en {zona}?')).toEqual(['distrito', 'zona']);
     expect(variablesDesconocidas(PLANTILLAS_COMPAT[1]!.texto)).toEqual([]);
+  });
+  it('lista los fragmentos de llaves mal formados', () => {
+    expect(llavesMalformadas('¿Qué {} y {mi-var} y {marca')).toEqual(['{}', '{mi-var}', '{marca']);
+    expect(llavesMalformadas('hola }')).toEqual(['}']);
+    expect(llavesMalformadas('{ } y { }')).toEqual(['{ }']);
+    expect(llavesMalformadas('¿Qué {categoria} para {necesidad}?')).toEqual([]);
   });
 });

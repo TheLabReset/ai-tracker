@@ -58,6 +58,16 @@ describe('plantillas', () => {
     expect(await screen.findByText('Ya hay una plantilla con ese código.')).toBeInTheDocument();
   });
 
+  it('rechaza llaves mal formadas y no muestra vista previa', async () => {
+    const d = conSesion('admin@reset.com.pe', true);
+    renderConDatos(<Plantillas sectorId={d.estado.sectores[0]!.id} />, { datos: d });
+    await userEvent.click(await screen.findByRole('button', { name: 'Nueva plantilla' }));
+    await userEvent.type(screen.getByLabelText('Texto'), '¿Qué {{}?');
+    expect(screen.getByText('Revisa las llaves: «{}» no es una variable.')).toBeInTheDocument();
+    expect(screen.queryByText('Vista previa')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Guardar' })).toBeDisabled();
+  });
+
   it('quien no es líder ve la lista pero no el botón', async () => {
     const d = conSesion('ana@reset.com.pe', false);
     renderConDatos(<Plantillas sectorId={d.estado.sectores[0]!.id} />, { datos: d });

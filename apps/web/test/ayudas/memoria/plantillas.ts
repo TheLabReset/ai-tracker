@@ -1,5 +1,5 @@
 import { ErrorDatos, type Datos, type Plantilla } from '@lab/datos';
-import { PLANTILLAS_COMPAT, variablesDesconocidas } from '@lab/nucleo';
+import { PLANTILLAS_COMPAT, llavesMalformadas, variablesDesconocidas } from '@lab/nucleo';
 import { esUuid, generico, invalido, porTexto, sinPermisoCatalogo, type Contexto } from './contexto';
 import { TIPOS_PREGUNTA } from './validar';
 
@@ -24,6 +24,8 @@ export function crearPlantillas(ctx: Contexto): Plantillas {
 
     crearPlantilla: (p) =>
       ctx.escribir((yo) => {
+        const [malformada] = llavesMalformadas(p.texto);
+        if (malformada) throw new ErrorDatos('datos_invalidos', `Revisa las llaves: «${malformada}» no es una variable.`);
         const [desconocida] = variablesDesconocidas(p.texto);
         if (desconocida) throw new ErrorDatos('datos_invalidos', `La variable {${desconocida}} no existe`);
         const global = p.sectorId == null;
