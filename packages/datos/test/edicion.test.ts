@@ -83,6 +83,32 @@ describe('edición de proyectos', () => {
     const v2 = await admin.datos.editarPregunta(p1.id, '¿Hola\n  mundo?\n');
     expect(v2.texto).toBe('¿Hola mundo?');
   });
+  it('quitar al competidor principal vuelve a escribir P2 con el nuevo principal', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const pid = await admin.datos.crearProyecto(await alta(admin.datos));
+    const p = await admin.datos.obtenerProyecto(pid);
+    const viejo = p.preguntas.find((q) => q.codigo === 'P2')!;
+    const nueva = await admin.datos.crearMarca(p.sector.id, { nombre: `Converse ${crypto.randomUUID().slice(0, 6)}`, ambiguo: false, alias: [], dominios: [] });
+    await admin.datos.cambiarCompetidores(pid, [nueva.id]);
+    const r = await admin.datos.obtenerProyecto(pid);
+    expect(r.competidorPrincipalId).toBe(nueva.id);
+    expect(r.preguntas.filter((q) => q.codigo === 'P2')).toMatchObject([{ version: 2, texto: `¿${p.marca.nombre} o ${nueva.nombre}? ¿Cuál me conviene?` }]);
+    const { data } = await clienteServicio()
+      .from('preguntas').select('id, version, activa, reemplaza_a, set, tipo').eq('proyecto_id', pid).eq('codigo', 'P2').order('version');
+    expect(data).toMatchObject([
+      { id: viejo.id, version: 1, activa: false, reemplaza_a: null },
+      { version: 2, activa: true, reemplaza_a: viejo.id, set: 'compat', tipo: 'comparativa' },
+    ]);
+  });
+  it('sin P2 activa, cambiar el principal no crea preguntas', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const pid = await admin.datos.crearProyecto(await alta(admin.datos, { competidores: [0, 1].map((i) => ({ nombre: `Rival ${i} ${crypto.randomUUID().slice(0, 6)}`, ambiguo: false, alias: [], dominios: [] })) }));
+    const p = await admin.datos.obtenerProyecto(pid);
+    await admin.datos.desactivarPregunta(p.preguntas.find((q) => q.codigo === 'P2')!.id);
+    await admin.datos.actualizarProyecto(pid, { competidorPrincipalId: p.competidores[1]!.id });
+    const { count } = await clienteServicio().from('preguntas').select('id', { count: 'exact', head: true }).eq('proyecto_id', pid).eq('codigo', 'P2');
+    expect(count).toBe(1);
+  });
   it('desactivar deja siempre una pregunta activa', async () => {
     const admin = await usuarioDePrueba({ admin: true });
     const pid = await admin.datos.crearProyecto(await alta(admin.datos));

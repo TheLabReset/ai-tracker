@@ -1,3 +1,4 @@
+import { armarSetCompat } from '@lab/nucleo';
 import { describe, expect, it } from 'vitest';
 import type { Datos, NuevaMarca } from '../src/tipos';
 import { alta } from './ayudas/alta';
@@ -53,6 +54,28 @@ export function probarContrato(
       const v2 = await admin.editarPregunta(p1.id, '¿Qué marca de zapatillas me recomiendas en Perú?');
       expect(v2).toMatchObject({ codigo: p1.codigo, version: 2 });
       expect((await admin.obtenerProyecto(pid)).preguntas.filter((q) => q.codigo === p1.codigo)).toEqual([v2]);
+    });
+
+    it('P2 sigue al competidor principal y versiona solo si cambia', async () => {
+      const { admin } = await preparar();
+      const marca = unico('Bata');
+      const [a, b] = [unico('Footloose'), unico('Skechers')];
+      const preguntas = armarSetCompat({ categoria: 'calzado', marca, competidor: a }).map((p) => ({ ...p, set: 'compat' as const, categoria: null }));
+      const base = await alta(admin, { competidores: [marcaNueva(a), marcaNueva(b)], competidorPrincipal: 0, preguntas });
+      const pid = await admin.crearProyecto({ ...base, marca: { ...base.marca, nombre: marca } });
+      const p2 = async () => (await admin.obtenerProyecto(pid)).preguntas.filter((q) => q.codigo === 'P2');
+      const { competidores } = await admin.obtenerProyecto(pid);
+      const idDe = (n: string) => competidores.find((c) => c.nombre === n)!.id;
+      expect(await p2()).toMatchObject([{ version: 1, texto: `¿${marca} o ${a}? ¿Cuál me conviene?` }]);
+
+      await admin.actualizarProyecto(pid, { competidorPrincipalId: idDe(b) });
+      expect(await p2()).toMatchObject([{ version: 2, set: 'compat', tipo: 'comparativa', texto: `¿${marca} o ${b}? ¿Cuál me conviene?` }]);
+      await admin.actualizarProyecto(pid, { competidorPrincipalId: idDe(b), muestras: 4 });
+      expect(await p2()).toMatchObject([{ version: 2 }]);
+
+      await admin.cambiarCompetidores(pid, [idDe(a)]);
+      expect(await p2()).toMatchObject([{ version: 3, texto: `¿${marca} o ${a}? ¿Cuál me conviene?` }]);
+      expect((await admin.obtenerProyecto(pid)).preguntas).toHaveLength(5);
     });
 
     it('quien no es líder ni admin no da de alta', async () => {

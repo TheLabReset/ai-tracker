@@ -415,6 +415,9 @@ isOneToOne: false
 "puede_ver_marca":
 { Args: { "marca": string }; Returns: boolean
                            },
+"renovar_p2":
+{ Args: { "p": string }; Returns: undefined
+                           },
 "rol_en_marca":
 { Args: { "marca": string }; Returns: string
                            },

@@ -37,6 +37,38 @@ export function crearEdicion(ctx: Contexto): Edicion {
     p.competidorIds = nuevos;
   };
 
+  const editarTexto = (preguntaId: string, texto: string): PreguntaEnMemoria => {
+    const { pregunta, proyecto } = exigirPregunta(preguntaId);
+    if (!pregunta.activa) throw invalido('Esa es una versión anterior de la pregunta.');
+    const nuevoTexto = normalizar(texto ?? '');
+    if (nuevoTexto === '') throw invalido('Escribe el texto de la pregunta.');
+    if (nuevoTexto === normalizar(pregunta.texto)) return pregunta;
+    const antes = structuredClone(pregunta);
+    pregunta.activa = false;
+    ctx.registrar('preguntas', pregunta.id, 'actualizar', antes, pregunta);
+    const nueva: PreguntaEnMemoria = {
+      ...pregunta,
+      id: ctx.nuevoId(),
+      proyectoId: proyecto.id,
+      texto: nuevoTexto,
+      version: pregunta.version + 1,
+      activa: true,
+      reemplazaA: pregunta.id,
+    };
+    estado.preguntas.push(nueva);
+    ctx.registrar('preguntas', nueva.id, 'insertar', null, nueva);
+    return nueva;
+  };
+
+  const renovarP2 = (p: ProyectoEnMemoria) => {
+    const p2 = estado.preguntas.find((q) => q.proyectoId === p.id && q.activa && q.set === 'compat' && q.codigo === 'P2');
+    const plantilla = estado.plantillas.find((t) => t.sectorId === null && t.codigo === 'P2');
+    const marca = estado.marcas.find((m) => m.id === p.marcaId);
+    const competidor = estado.marcas.find((m) => m.id === p.competidorPrincipalId);
+    if (!p2 || !plantilla || !marca || !competidor) return;
+    editarTexto(p2.id, plantilla.texto.replaceAll('{marca}', () => marca.nombre).replaceAll('{competidor}', () => competidor.nombre));
+  };
+
   return {
     actualizarProyecto: (id, c) =>
       ctx.escribir(() => {
@@ -89,6 +121,7 @@ export function crearEdicion(ctx: Contexto): Edicion {
           p.motorIds = [...new Set(c.motorIds!)];
           for (const m of p.motorIds) ctx.registrar('proyecto_motores', `${p.id}/${m}`, 'insertar', null, { proyectoId: p.id, motorId: m });
         }
+        if (hay('competidorPrincipalId') && p.competidorPrincipalId !== antes.competidorPrincipalId) renovarP2(p);
       }),
 
     cambiarCompetidores: (id, marcaIds) =>
@@ -104,33 +137,13 @@ export function crearEdicion(ctx: Contexto): Edicion {
         }
         const antes = structuredClone(p);
         reemplazarCompetidores(p, [...marcaIds]);
-        if (!p.competidorPrincipalId || !marcaIds.includes(p.competidorPrincipalId)) p.competidorPrincipalId = marcaIds[0]!;
+        const cambiaPrincipal = !p.competidorPrincipalId || !marcaIds.includes(p.competidorPrincipalId);
+        if (cambiaPrincipal) p.competidorPrincipalId = marcaIds[0]!;
         ctx.registrarSiCambia('proyectos', p.id, antes, p);
+        if (cambiaPrincipal) renovarP2(p);
       }),
 
-    editarPregunta: (preguntaId, texto) =>
-      ctx.escribir(() => {
-        const { pregunta, proyecto } = exigirPregunta(preguntaId);
-        if (!pregunta.activa) throw invalido('Esa es una versión anterior de la pregunta.');
-        const nuevoTexto = normalizar(texto ?? '');
-        if (nuevoTexto === '') throw invalido('Escribe el texto de la pregunta.');
-        if (nuevoTexto === normalizar(pregunta.texto)) return soloPregunta(pregunta);
-        const antes = structuredClone(pregunta);
-        pregunta.activa = false;
-        ctx.registrar('preguntas', pregunta.id, 'actualizar', antes, pregunta);
-        const nueva: PreguntaEnMemoria = {
-          ...pregunta,
-          id: ctx.nuevoId(),
-          proyectoId: proyecto.id,
-          texto: nuevoTexto,
-          version: pregunta.version + 1,
-          activa: true,
-          reemplazaA: pregunta.id,
-        };
-        estado.preguntas.push(nueva);
-        ctx.registrar('preguntas', nueva.id, 'insertar', null, nueva);
-        return soloPregunta(nueva);
-      }),
+    editarPregunta: (preguntaId, texto) => ctx.escribir(() => soloPregunta(editarTexto(preguntaId, texto))),
 
     agregarPregunta: (proyectoId, p) =>
       ctx.escribir(() => {

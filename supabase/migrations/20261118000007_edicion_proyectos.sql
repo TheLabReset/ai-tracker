@@ -14,6 +14,35 @@ $$;
 
 revoke execute on function tracker.exigir_edicion(uuid) from public, anon, authenticated;
 
+-- P2 nombra al competidor principal: si cambia, nueva versión con la plantilla global.
+create function tracker.renovar_p2(p uuid) returns void
+language plpgsql volatile security definer
+set search_path = ''
+as $$
+declare
+  v_pregunta uuid;
+  v_texto text;
+begin
+  select q.id into v_pregunta from tracker.preguntas q
+  where q.proyecto_id = p and q.activa and q.set = 'compat' and q.codigo = 'P2';
+  if v_pregunta is null then
+    return;
+  end if;
+  select replace(replace(t.texto, '{marca}', m.nombre), '{competidor}', c.nombre) into v_texto
+  from tracker.proyectos pr
+  join tracker.marcas m on m.id = pr.marca_id
+  join tracker.marcas c on c.id = pr.competidor_principal_id
+  join tracker.plantillas t on t.sector_id is null and t.codigo = 'P2'
+  where pr.id = p;
+  if v_texto is null then
+    return;
+  end if;
+  perform tracker.editar_pregunta(v_pregunta, v_texto);
+end
+$$;
+
+revoke execute on function tracker.renovar_p2(uuid) from public, anon, authenticated;
+
 create function tracker.actualizar_proyecto(p uuid, c jsonb) returns void
 language plpgsql volatile security definer
 set search_path = ''
@@ -21,10 +50,12 @@ as $$
 declare
   v_motores uuid[];
   v_extra text[];
+  v_principal uuid;
   m text;
   k text;
 begin
   perform tracker.exigir_edicion(p);
+  select competidor_principal_id into v_principal from tracker.proyectos where id = p;
   if jsonb_typeof(c) is distinct from 'object' then
     raise exception using message = 'datos_invalidos', detail = 'Los cambios no son válidos.';
   end if;
@@ -104,6 +135,9 @@ begin
     delete from tracker.proyecto_motores where proyecto_id = p;
     insert into tracker.proyecto_motores (proyecto_id, motor_id) select p, unnest(v_motores);
   end if;
+  if c ? 'competidorPrincipalId' and (c ->> 'competidorPrincipalId')::uuid is distinct from v_principal then
+    perform tracker.renovar_p2(p);
+  end if;
 end
 $$;
 
@@ -136,6 +170,7 @@ begin
   select p, x, o from unnest(marcas) with ordinality t(x, o);
   if v_principal is null or not (v_principal = any (marcas)) then
     update tracker.proyectos set competidor_principal_id = marcas[1] where id = p;
+    perform tracker.renovar_p2(p);
   end if;
 end
 $$;
