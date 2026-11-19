@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { crearDatos } from '../src/datos';
 import { ErrorDatos } from '../src/tipos';
-import { clienteServicio } from './ayudas/entorno';
+import { crearClienteTracker } from '../src/cliente';
+import { clienteServicio, entorno } from './ayudas/entorno';
 import { usuarioDePrueba } from './ayudas/usuarios';
 
 describe('usuarios y sesión', () => {
@@ -26,5 +28,32 @@ describe('usuarios y sesión', () => {
     const u = await usuarioDePrueba();
     expect((await u.datos.listarDirectorio()).some((x) => x.id === u.id)).toBe(true);
     await expect(u.datos.listarUsuarios()).rejects.toMatchObject({ codigo: 'sin_permiso' });
+  });
+  it('perfil_de no se puede llamar desde la API, ni con sesión ni sin ella', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const otro = await usuarioDePrueba();
+    const { url, claveAnonima } = entorno();
+    const anonimo = crearClienteTracker(url, claveAnonima);
+    expect((await anonimo.rpc('perfil_de', { usuario: admin.id })).error).not.toBeNull();
+    const sesion = crearClienteTracker(url, claveAnonima);
+    await sesion.auth.signInWithPassword({ email: otro.correo, password: 'clave-de-prueba-123' });
+    const r = await sesion.rpc('perfil_de', { usuario: admin.id });
+    expect(r.error).not.toBeNull();
+    expect(r.data).toBeNull();
+  });
+  it('quitar una membresía ajena sin ser admin da sin_permiso', async () => {
+    const otro = await usuarioDePrueba();
+    const u = await usuarioDePrueba();
+    const marcaId = crypto.randomUUID();
+    await clienteServicio().from('membresias').insert({ usuario_id: otro.id, marca_id: marcaId, rol: 'lector' });
+    await expect(u.datos.quitarMembresia(otro.id, marcaId)).rejects.toMatchObject({ codigo: 'sin_permiso' });
+  });
+  it('crearClave sin sesión da datos_invalidos con texto en español', async () => {
+    const { url, claveAnonima } = entorno();
+    const datos = crearDatos(crearClienteTracker(url, claveAnonima));
+    await expect(datos.crearClave('clave-nueva-123')).rejects.toMatchObject({
+      codigo: 'datos_invalidos',
+      message: expect.stringMatching(/venció/),
+    });
   });
 });

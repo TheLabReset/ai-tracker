@@ -7,6 +7,14 @@ type Sesion = Pick<Datos, 'entrar' | 'sesionActual' | 'salir' | 'pedirRecuperaci
 
 const correoNoPermitido = () => new ErrorDatos('correo_no_permitido', 'Usa tu correo de Reset o Wanted.');
 
+function mensajeClave(error: { name?: string; code?: string }): string {
+  if (error.name === 'AuthSessionMissingError') return 'El enlace venció. Pide uno nuevo desde «¿La olvidaste?».';
+  if (error.name === 'AuthWeakPasswordError' || error.code === 'weak_password') {
+    return 'La contraseña debe tener al menos 6 caracteres.';
+  }
+  return 'No pudimos guardar tu contraseña. Inténtalo de nuevo.';
+}
+
 export function crearSesion(cliente: ClienteTracker): Sesion {
   async function sincronizar(): Promise<Perfil> {
     return comprobar(await cliente.rpc('sincronizar_perfil')) as unknown as Perfil;
@@ -43,7 +51,11 @@ export function crearSesion(cliente: ClienteTracker): Sesion {
     crearClave: (clave) =>
       conTraduccion(async () => {
         const { error } = await cliente.auth.updateUser({ password: clave });
-        if (error) throw new ErrorDatos('datos_invalidos', error.message);
+        if (error) {
+          const t = traducirError(error);
+          if (t.codigo !== 'otro') throw t;
+          throw new ErrorDatos('datos_invalidos', mensajeClave(error));
+        }
       }),
   };
 }

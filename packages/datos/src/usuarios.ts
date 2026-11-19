@@ -57,8 +57,7 @@ export function crearUsuarios(cliente: ClienteTracker, sesionActual: Datos['sesi
         const filtro = { usuario_id: usuarioId, marca_id: marcaId };
         const borradas = comprobarLista(await cliente.from('membresias').delete().match(filtro).select());
         if (borradas.length > 0) return;
-        const sigue = comprobarLista(await cliente.from('membresias').select('usuario_id').match(filtro));
-        if (sigue.length > 0) throw sinPermiso();
+        if (!comprobar(await cliente.rpc('es_admin'))) throw sinPermiso();
       }),
   };
 }

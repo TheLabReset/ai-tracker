@@ -81,6 +81,8 @@ as $$
   from tracker.usuarios u where u.id = usuario
 $$;
 
+revoke execute on function tracker.perfil_de(uuid) from public, anon, authenticated;
+
 create function tracker.sincronizar_perfil() returns jsonb
 language plpgsql volatile security definer
 set search_path = ''
