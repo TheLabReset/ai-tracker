@@ -1,13 +1,11 @@
 import type { ClienteTracker } from './cliente';
-import { comprobar, comprobarLista, conTraduccion } from './errores';
-import { ErrorDatos, type Datos, type UsuarioListado } from './tipos';
+import { comprobar, comprobarLista, conTraduccion, sinPermiso } from './errores';
+import type { Datos, UsuarioListado } from './tipos';
 
 type Usuarios = Pick<
   Datos,
   'listarDirectorio' | 'listarUsuarios' | 'cambiarAdmin' | 'asignarMembresia' | 'quitarMembresia'
 >;
-
-const sinPermiso = () => new ErrorDatos('sin_permiso', 'Solo un admin puede hacer esto.');
 
 export function crearUsuarios(cliente: ClienteTracker, sesionActual: Datos['sesionActual']): Usuarios {
   return {

@@ -1,6 +1,6 @@
 import type { ClienteTracker } from './cliente';
-import { comprobar, comprobarLista, conTraduccion } from './errores';
-import { ErrorDatos, type AliasGuardado, type Datos, type Marca, type Sector } from './tipos';
+import { comprobar, comprobarLista, conTraduccion, sinPermiso } from './errores';
+import type { AliasGuardado, Datos, Marca, Sector } from './tipos';
 
 type Catalogo = Pick<
   Datos,
@@ -52,7 +52,7 @@ export function crearCatalogo(cliente: ClienteTracker): Catalogo {
       conTraduccion(async () => {
         const borrados = comprobarLista(await cliente.from('alias').delete().eq('id', aliasId).select());
         if (borrados.length > 0) return;
-        if (!comprobar(await cliente.rpc('es_admin'))) throw new ErrorDatos('sin_permiso', 'Solo un admin puede hacer esto.');
+        if (!comprobar(await cliente.rpc('es_admin'))) throw sinPermiso();
       }),
   };
 }

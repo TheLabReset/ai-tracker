@@ -44,6 +44,8 @@ export function traducirError(error: unknown): ErrorDatos {
   return new ErrorDatos('otro', mensaje || 'Algo salió mal.');
 }
 
+export const sinPermiso = () => new ErrorDatos('sin_permiso', 'Solo un admin puede hacer esto.');
+
 export function comprobar<T>(r: { data: T; error: unknown }): T {
   if (r.error) throw traducirError(r.error);
   return r.data;

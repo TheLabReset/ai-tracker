@@ -105,6 +105,40 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"motores": {
+                  Row: {
+                    "activo": boolean,"busqueda_web": boolean,"codigo": string,"costo_estimado": number | null,"id": string,"modelo": string | null,"nombre": string,"orden": number,"parametros": NonNullable<Json>,"proveedor": string,"vigente_desde": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "activo"?: boolean,"busqueda_web"?: boolean,"codigo": string,"costo_estimado"?: number | null,"id"?: string,"modelo"?: string | null,"nombre": string,"orden": number,"parametros"?: NonNullable<Json>,"proveedor": string,"vigente_desde"?: string
+                  }
+                  Update: {
+                    "activo"?: boolean,"busqueda_web"?: boolean,"codigo"?: string,"costo_estimado"?: number | null,"id"?: string,"modelo"?: string | null,"nombre"?: string,"orden"?: number,"parametros"?: NonNullable<Json>,"proveedor"?: string,"vigente_desde"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"motores_historial": {
+                  Row: {
+                    "busqueda_web": boolean,"cambiado_por": string | null,"id": string,"modelo": string | null,"motor_id": string,"parametros": NonNullable<Json>,"vigente_hasta": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "busqueda_web": boolean,"cambiado_por"?: string | null,"id"?: string,"modelo"?: string | null,"motor_id": string,"parametros": NonNullable<Json>,"vigente_hasta": string
+                  }
+                  Update: {
+                    "busqueda_web"?: boolean,"cambiado_por"?: string | null,"id"?: string,"modelo"?: string | null,"motor_id"?: string,"parametros"?: NonNullable<Json>,"vigente_hasta"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "motores_historial_motor_id_fkey"
+      columns: ["motor_id"]
+isOneToOne: false
+      referencedRelation: "motores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"sectores": {
                   Row: {
                     "categoria": string,"id": string,"idioma": string,"nombre": string,"pais": string

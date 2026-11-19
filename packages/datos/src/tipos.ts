@@ -68,6 +68,24 @@ export interface NuevaMarca {
   dominios: string[];
 }
 
+export interface Motor {
+  id: string;
+  codigo: string;
+  nombre: string;
+  proveedor: string;
+  modelo: string | null;
+  busquedaWeb: boolean;
+  costoEstimado: number | null;
+  activo: boolean;
+  vigenteDesde: string;
+}
+
+export interface CambioMotor {
+  modelo: string | null;
+  busquedaWeb: boolean;
+  vigenteHasta: string;
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -85,4 +103,10 @@ export interface Datos {
   crearMarca(sectorId: string, m: NuevaMarca): Promise<Marca>;
   agregarAlias(marcaId: string, a: { texto: string; ambiguo: boolean }): Promise<AliasGuardado>;
   quitarAlias(aliasId: string): Promise<void>;
+  listarMotores(): Promise<Motor[]>;
+  actualizarMotor(
+    id: string,
+    cambios: Partial<Pick<Motor, 'modelo' | 'busquedaWeb' | 'costoEstimado' | 'activo'>>,
+  ): Promise<Motor>;
+  historialMotor(id: string): Promise<CambioMotor[]>;
 }
