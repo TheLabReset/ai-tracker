@@ -54,7 +54,8 @@ export function crearSesion(cliente: ClienteTracker, urlApp?: string): Sesion {
     crearClave: (clave) =>
       conTraduccion(async () => {
         const { error } = await cliente.auth.updateUser({ password: clave });
-        if (error) {
+        // Supabase rechaza repetir la contraseña actual; para quien la escribe, el resultado es el mismo que guardarla.
+        if (error && error.code !== 'same_password') {
           const t = traducirError(error);
           if (t.codigo !== 'otro') throw t;
           throw new ErrorDatos('datos_invalidos', mensajeClave(error));
