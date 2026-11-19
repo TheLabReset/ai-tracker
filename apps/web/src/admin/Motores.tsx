@@ -4,10 +4,9 @@ import { useState, type FormEvent } from 'react';
 import { fechaLima } from '../app/etiquetas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
+import { estiloBotonLinea, estiloBotonMod } from '../app/estilos';
 
 const POR_DEFINIR = 'Por definir';
-const estiloBotonMod = 'rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta disabled:opacity-60';
-const estiloBotonLinea = 'rounded-pildora border border-linea px-e4 py-e1 text-(length:--t-14) font-semibold';
 
 function precioValido(texto: string) {
   const t = texto.trim();

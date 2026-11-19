@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { fechaLima } from '../app/etiquetas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
+import { estiloBotonMod } from '../app/estilos';
 
-const estiloBotonMod = 'rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta';
 const LIMITE = 100;
 const ENTIDADES = [
   'usuarios',

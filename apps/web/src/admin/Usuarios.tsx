@@ -5,8 +5,8 @@ import { ETIQUETA_EMPRESA, ETIQUETA_ROL, ETIQUETA_ROL_CORTA } from '../app/etiqu
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
 import { useSesion } from '../sesion/useSesion';
+import { estiloBotonMod } from '../app/estilos';
 
-const estiloBotonMod = 'rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta disabled:opacity-60';
 const estiloBotonLinea = 'rounded-pildora border border-linea px-e4 py-e1 text-(length:--t-14) font-semibold';
 const ROLES = Object.keys(ETIQUETA_ROL) as RolMarca[];
 
