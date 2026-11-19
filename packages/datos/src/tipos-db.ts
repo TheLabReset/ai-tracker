@@ -5,17 +5,109 @@ export type Database = {
   
   "tracker": {
           Tables: {
-            [_ in never]: never
+            "admins": {
+                  Row: {
+                    "correo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "correo": string
+                  }
+                  Update: {
+                    "correo"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"empresas": {
+                  Row: {
+                    "dominio": string,"id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "dominio": string,"id": string
+                  }
+                  Update: {
+                    "dominio"?: string,"id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"membresias": {
+                  Row: {
+                    "marca_id": string,"rol": string,"usuario_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "marca_id": string,"rol": string,"usuario_id": string
+                  }
+                  Update: {
+                    "marca_id"?: string,"rol"?: string,"usuario_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "membresias_usuario_id_fkey"
+      columns: ["usuario_id"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"usuarios": {
+                  Row: {
+                    "correo": string,"empresa_id": string,"es_admin": boolean,"id": string,"nombre": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "correo": string,"empresa_id": string,"es_admin"?: boolean,"id": string,"nombre": string
+                  }
+                  Update: {
+                    "correo"?: string,"empresa_id"?: string,"es_admin"?: boolean,"id"?: string,"nombre"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "usuarios_empresa_id_fkey"
+      columns: ["empresa_id"]
+isOneToOne: false
+      referencedRelation: "empresas"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            "clave":
+            "cambiar_admin":
+{ Args: { "usuario": string,"valor": boolean }; Returns: undefined
+                           },
+"clave":
 { Args: { "t": string }; Returns: string
+                           },
+"es_admin":
+{ Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "es_correo_permitido":
 { Args: { "correo": string }; Returns: boolean
+                           },
+"es_usuario":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"perfil_de":
+{ Args: { "usuario": string }; Returns: Json
+                           },
+"puede_editar_marca":
+{ Args: { "marca": string }; Returns: boolean
+                           },
+"puede_ver_marca":
+{ Args: { "marca": string }; Returns: boolean
+                           },
+"rol_en_marca":
+{ Args: { "marca": string }; Returns: string
+                           },
+"sincronizar_perfil":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            }
           }
           Enums: {

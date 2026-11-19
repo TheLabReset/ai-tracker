@@ -5,5 +5,6 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     environment: 'node',
     globalSetup: ['test/ayudas/global.ts'],
+    fileParallelism: false,
   },
 });
