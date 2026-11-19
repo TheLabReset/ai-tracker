@@ -17,16 +17,30 @@ const pantalla = () => (
   </Routes>
 );
 
+function conEnlace() {
+  const d = crearDatosEnMemoria({ usuarios: [{ correo: 'ana@reset.com.pe', clave: 'x' }] });
+  d.estado.sesion = 'ana@reset.com.pe';
+  return d;
+}
+
 async function llenar(clave: string, repetida: string) {
   const u = userEvent.setup();
+  const boton = await screen.findByRole('button', { name: 'Guardar y entrar' });
   if (clave) await u.type(screen.getByLabelText('Contraseña nueva'), clave);
   if (repetida) await u.type(screen.getByLabelText('Repítela'), repetida);
-  await u.click(screen.getByRole('button', { name: 'Guardar y entrar' }));
+  await u.click(boton);
 }
 
 describe('crear contraseña', () => {
-  it('avisa si faltan datos o si no coinciden, sin guardar nada', async () => {
+  it('sin la sesión del enlace pide abrir el correo en vez del formulario', async () => {
     const datos = crearDatosEnMemoria();
+    renderConDatos(pantalla(), { datos, ruta: '/crear-password' });
+    expect(await screen.findByText('Abre el enlace que te llegó por correo para crear tu contraseña.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Contraseña nueva')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Guardar y entrar' })).toBeNull();
+  });
+  it('avisa si faltan datos o si no coinciden, sin guardar nada', async () => {
+    const datos = conEnlace();
     renderConDatos(pantalla(), { datos, ruta: '/crear-password' });
     await llenar('', '');
     expect(await screen.findByText('Escribe tu contraseña.')).toBeInTheDocument();
@@ -35,14 +49,14 @@ describe('crear contraseña', () => {
     expect(datos.estado.clavesNuevas).toEqual([]);
   });
   it('guarda la contraseña y lleva a la raíz', async () => {
-    const datos = crearDatosEnMemoria();
+    const datos = conEnlace();
     renderConDatos(pantalla(), { datos, ruta: '/crear-password' });
     await llenar('secreta123', 'secreta123');
     expect(await screen.findByText('ruta: /')).toBeInTheDocument();
     expect(datos.estado.clavesNuevas).toEqual(['secreta123']);
   });
   it('muestra el mensaje de datos si falla', async () => {
-    const datos = crearDatosEnMemoria();
+    const datos = conEnlace();
     datos.crearClave = async () => {
       throw new ErrorDatos('datos_invalidos', 'La contraseña debe tener al menos 6 caracteres.');
     };

@@ -4,12 +4,13 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useDatos } from '../app/proveedores';
 import { EncabezadoFormulario, estiloBoton, estiloCampo, MarcoAcceso } from './MarcoAcceso';
-import { CLAVE_SESION } from './useSesion';
+import { CLAVE_SESION, useSesion } from './useSesion';
 
 export function CrearClave() {
   const datos = useDatos();
   const cliente = useQueryClient();
   const navegar = useNavigate();
+  const { perfil, cargando } = useSesion();
   const [clave, setClave] = useState('');
   const [repetida, setRepetida] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,15 @@ export function CrearClave() {
       setOcupado(false);
     }
   }
+
+  if (cargando) return <p role="status" className="p-e6">Cargando…</p>;
+  if (!perfil)
+    return (
+      <MarcoAcceso>
+        <EncabezadoFormulario etiqueta="CREAR CONTRASEÑA" titulo="Elige tu contraseña" />
+        <p className="text-(length:--t-16) text-tinta-2">Abre el enlace que te llegó por correo para crear tu contraseña.</p>
+      </MarcoAcceso>
+    );
 
   return (
     <MarcoAcceso>
