@@ -127,7 +127,7 @@ begin
   if v_marca = any (marcas) then
     raise exception using message = 'datos_invalidos', detail = 'La marca no puede ser su propio competidor.';
   end if;
-  if (select count(*) from tracker.marcas where id = any (marcas) and sector_id = v_sector) <> array_length(marcas, 1) then
+  if (select count(*) from tracker.marcas where id = any (cambiar_competidores.marcas) and sector_id = v_sector) <> array_length(marcas, 1) then
     raise exception using message = 'datos_invalidos', detail = 'Un competidor no es del sector de la marca.';
   end if;
 
@@ -148,6 +148,7 @@ declare
   v_proyecto uuid;
   v_fila tracker.preguntas;
   v_nueva tracker.preguntas;
+  v_texto text := btrim(regexp_replace(coalesce(texto, ''), '\s+', ' ', 'g'));
 begin
   select proyecto_id into v_proyecto from tracker.preguntas where id = pregunta;
   if v_proyecto is null then
@@ -158,16 +159,16 @@ begin
   if not v_fila.activa then
     raise exception using message = 'datos_invalidos', detail = 'Esa es una versión anterior de la pregunta.';
   end if;
-  if length(btrim(coalesce(texto, ''))) = 0 then
+  if v_texto = '' then
     raise exception using message = 'datos_invalidos', detail = 'Escribe el texto de la pregunta.';
   end if;
-  if regexp_replace(btrim(texto), '\s+', ' ', 'g') = regexp_replace(btrim(v_fila.texto), '\s+', ' ', 'g') then
+  if v_texto = btrim(regexp_replace(v_fila.texto, '\s+', ' ', 'g')) then
     return v_fila;
   end if;
 
   update tracker.preguntas set activa = false where id = pregunta;
   insert into tracker.preguntas (proyecto_id, codigo, tipo, set, categoria, texto, version, activa, reemplaza_a)
-  values (v_fila.proyecto_id, v_fila.codigo, v_fila.tipo, v_fila.set, v_fila.categoria, btrim(texto), v_fila.version + 1, true, v_fila.id)
+  values (v_fila.proyecto_id, v_fila.codigo, v_fila.tipo, v_fila.set, v_fila.categoria, v_texto, v_fila.version + 1, true, v_fila.id)
   returning * into v_nueva;
   return v_nueva;
 end
@@ -180,18 +181,19 @@ as $$
 declare
   v_n int;
   v_nueva tracker.preguntas;
+  v_texto text := btrim(regexp_replace(coalesce(texto, ''), '\s+', ' ', 'g'));
 begin
   perform tracker.exigir_edicion(proyecto);
   if tipo is null or tipo not in ('descubrimiento', 'comparativa', 'marca') then
     raise exception using message = 'datos_invalidos', detail = 'El tipo de pregunta no es válido.';
   end if;
-  if length(btrim(coalesce(texto, ''))) = 0 then
+  if v_texto = '' then
     raise exception using message = 'datos_invalidos', detail = 'Escribe el texto de la pregunta.';
   end if;
   select coalesce(max(substr(q.codigo, 2)::int), 0) + 1 into v_n
   from tracker.preguntas q where q.proyecto_id = proyecto and q.codigo ~ '^X[0-9]{1,9}$';
   insert into tracker.preguntas (proyecto_id, codigo, tipo, set, categoria, texto)
-  values (proyecto, 'X' || v_n, tipo, 'propia', nullif(btrim(categoria), ''), btrim(texto))
+  values (proyecto, 'X' || v_n, tipo, 'propia', nullif(btrim(categoria), ''), v_texto)
   returning * into v_nueva;
   return v_nueva;
 end

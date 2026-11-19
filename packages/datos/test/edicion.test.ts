@@ -16,7 +16,7 @@ describe('edición de proyectos', () => {
     expect(data).toEqual([{ version: 1, activa: false }, { version: 2, activa: true }]);
     await expect(admin.datos.editarPregunta(p1.id, 'otro texto')).rejects.toMatchObject({ codigo: 'datos_invalidos' });
   });
-  it('suma preguntas propias, cambia competidores y pausa el proyecto', async () => {
+  it('suma preguntas propias, rechaza más de cinco competidores y pausa el proyecto', async () => {
     const admin = await usuarioDePrueba({ admin: true });
     const pid = await admin.datos.crearProyecto(await alta(admin.datos));
     expect((await admin.datos.agregarPregunta(pid, { tipo: 'descubrimiento', texto: '¿Qué zapatillas duran más?', categoria: null })).codigo).toBe('X1');
@@ -57,6 +57,31 @@ describe('edición de proyectos', () => {
     expect(await admin.datos.obtenerProyecto(pid)).toMatchObject({ muestras: 5, categoriasExtra: ['running'], topeGastoMensual: 40, motores: [{ id: motor }] });
     await expect(admin.datos.cambiarCompetidores(pid, [p.marca.id])).rejects.toMatchObject({ codigo: 'datos_invalidos' });
     await expect(admin.datos.cambiarEstado(pid, 'roto' as never)).rejects.toMatchObject({ codigo: 'datos_invalidos' });
+  });
+  it('cambia los competidores en el orden dado y ajusta el principal', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const pid = await admin.datos.crearProyecto(await alta(admin.datos));
+    const p = await admin.datos.obtenerProyecto(pid);
+    const nueva = (n: string) => admin.datos.crearMarca(p.sector.id, { nombre: `${n} ${crypto.randomUUID().slice(0, 6)}`, ambiguo: false, alias: [], dominios: [] });
+    const [a, b] = [await nueva('A'), await nueva('B')];
+    await admin.datos.cambiarCompetidores(pid, [b.id, a.id]);
+    const r = await admin.datos.obtenerProyecto(pid);
+    expect(r.competidores.map((c) => c.id)).toEqual([b.id, a.id]);
+    expect(r.competidorPrincipalId).toBe(b.id);
+    await admin.datos.actualizarProyecto(pid, { competidorPrincipalId: a.id });
+    await admin.datos.cambiarCompetidores(pid, [b.id, a.id, p.competidores[0]!.id]);
+    expect((await admin.datos.obtenerProyecto(pid)).competidorPrincipalId).toBe(a.id);
+  });
+  it('los espacios y saltos de línea no crean versiones ni textos vacíos', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const pid = await admin.datos.crearProyecto(await alta(admin.datos));
+    const p1 = (await admin.datos.obtenerProyecto(pid)).preguntas[0]!;
+    expect(await admin.datos.editarPregunta(p1.id, `${p1.texto}\n`)).toMatchObject({ id: p1.id, version: 1 });
+    expect(await admin.datos.editarPregunta(p1.id, p1.texto.replace(/ /g, '  '))).toMatchObject({ id: p1.id, version: 1 });
+    await expect(admin.datos.editarPregunta(p1.id, '\n\t')).rejects.toMatchObject({ codigo: 'datos_invalidos' });
+    await expect(admin.datos.agregarPregunta(pid, { tipo: 'marca', texto: '\n\t', categoria: null })).rejects.toMatchObject({ codigo: 'datos_invalidos' });
+    const v2 = await admin.datos.editarPregunta(p1.id, '¿Hola\n  mundo?\n');
+    expect(v2.texto).toBe('¿Hola mundo?');
   });
   it('desactivar deja siempre una pregunta activa', async () => {
     const admin = await usuarioDePrueba({ admin: true });
