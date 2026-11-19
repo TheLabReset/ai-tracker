@@ -1,27 +1,13 @@
 import { ErrorDatos, type Motor } from '@lab/datos';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
+import { fechaLima } from '../app/etiquetas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
 
 const POR_DEFINIR = 'Por definir';
 const estiloBotonMod = 'rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta disabled:opacity-60';
 const estiloBotonLinea = 'rounded-pildora border border-linea px-e4 py-e1 text-(length:--t-14) font-semibold';
-
-const formatoFecha = new Intl.DateTimeFormat('es-PE', {
-  timeZone: 'America/Lima',
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23',
-});
-
-function fechaLima(iso: string) {
-  const p = Object.fromEntries(formatoFecha.formatToParts(new Date(iso)).map((x) => [x.type, x.value]));
-  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`;
-}
 
 function precioValido(texto: string) {
   const t = texto.trim();

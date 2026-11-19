@@ -57,3 +57,27 @@ export function crearDatosEnMemoria(semilla: Semilla = {}): Datos & { estado: Es
     ...crearBitacora(ctx),
   };
 }
+
+export function sectorConMarcas(
+  nombre: string,
+  marcas: Array<string | { nombre: string; alias?: string[] }>,
+  categoria = nombre.toLowerCase(),
+): { sectores: Sector[]; marcas: Marca[] } {
+  const sector: Sector = { id: crypto.randomUUID(), nombre, categoria };
+  return {
+    sectores: [sector],
+    marcas: marcas.map((m) => {
+      const { nombre: n, alias = [] } = typeof m === 'string' ? { nombre: m } : m;
+      return {
+        id: crypto.randomUUID(),
+        sectorId: sector.id,
+        nombre: n,
+        ambiguo: false,
+        esCliente: false,
+        empresaId: null,
+        dominios: [],
+        alias: [...alias].sort().map((texto) => ({ id: crypto.randomUUID(), texto, ambiguo: false })),
+      };
+    }),
+  };
+}

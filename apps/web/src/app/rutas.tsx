@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { Link, Route, Routes } from 'react-router';
+import { Bitacora } from '../admin/Bitacora';
 import { Motores } from '../admin/Motores';
+import { Usuarios } from '../admin/Usuarios';
 import { CrearClave } from '../sesion/CrearClave';
 import { useSesion } from '../sesion/useSesion';
 import { puedeCrearMarcas, SoloAdmin } from './guardas';
@@ -58,8 +60,8 @@ export function RutasInternas() {
       <Route path="/marcas/nueva" element={<Pantalla titulo="Nueva marca" />} />
       <Route path="/marcas/:proyectoId/configuracion" element={<Pantalla titulo="Configuración de la marca" />} />
       <Route path="/admin/motores" element={<SoloAdmin><Motores /></SoloAdmin>} />
-      <Route path="/admin/usuarios" element={<SoloAdmin><Pantalla titulo="Usuarios" /></SoloAdmin>} />
-      <Route path="/admin/bitacora" element={<SoloAdmin><Pantalla titulo="Bitácora" /></SoloAdmin>} />
+      <Route path="/admin/usuarios" element={<SoloAdmin><Usuarios /></SoloAdmin>} />
+      <Route path="/admin/bitacora" element={<SoloAdmin><Bitacora /></SoloAdmin>} />
       <Route path="*" element={<NoEncontrada />} />
     </Routes>
   );
