@@ -1,9 +1,18 @@
 {
   "name": "the-lab-ai-tracker",
   "private": true,
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:iniciar": "supabase start",
+    "db:parar": "supabase stop",
+    "db:reiniciar": "supabase db reset",
+    "db:tipos": "supabase gen types typescript --local --schema tracker > packages/datos/src/tipos-db.ts"
+  },
+  "devDependencies": {
+    "supabase": "^3.2.0"
   }
 }
