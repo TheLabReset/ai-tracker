@@ -21,7 +21,17 @@ describe('alta de marca · pasos 1 y 2', () => {
     await userEvent.type(await screen.findByLabelText('Nombre de la marca'), 'Bata');
     await userEvent.click(screen.getByRole('button', { name: 'Seguir' }));
     await userEvent.selectOptions(screen.getByLabelText('Sector'), 'Calzado');
-    expect(screen.getByText('Hereda el catálogo de 2 marcas y sus plantillas.')).toBeInTheDocument();
+    expect(screen.getByText('Hereda el catálogo de 2 marcas.')).toBeInTheDocument();
+    expect(screen.queryByText(/plantillas/)).toBeNull();
+  });
+  it('con una sola marca en el sector lo dice en singular', async () => {
+    const d = crearDatosEnMemoria({ usuarios: [{ correo: 'admin@reset.com.pe', clave: 'x', admin: true }], ...sectorConMarcas('Calzado', ['Footloose']) });
+    d.estado.sesion = 'admin@reset.com.pe';
+    renderConDatos(<Asistente />, { datos: d });
+    await userEvent.type(await screen.findByLabelText('Nombre de la marca'), 'Bata');
+    await userEvent.click(screen.getByRole('button', { name: 'Seguir' }));
+    await userEvent.selectOptions(screen.getByLabelText('Sector'), 'Calzado');
+    expect(screen.getByText('Hereda el catálogo de 1 marca.')).toBeInTheDocument();
   });
   it('avisa si la marca ya está en el catálogo del sector', async () => {
     renderConDatos(<Asistente />, { datos: datosDeAlta() });

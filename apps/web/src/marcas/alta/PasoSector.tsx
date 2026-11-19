@@ -20,7 +20,7 @@ function AvisosDelSector({ sectorId, nombreMarca }: { sectorId: string; nombreMa
   const yaEsta = nombreMarca.trim() !== '' && marcas.data.some((m) => claveMarca(m.nombre) === claveMarca(nombreMarca));
   return (
     <>
-      <p className={estiloAviso}>Hereda el catálogo de {n === 1 ? '1 marca' : `${n} marcas`} y sus plantillas.</p>
+      <p className={estiloAviso}>Hereda el catálogo de {n === 1 ? '1 marca' : `${n} marcas`}.</p>
       {yaEsta && sector && (
         <p className={estiloAviso}>
           «{nombreMarca.trim()}» ya está en el catálogo de {sector.nombre}: la tomamos como marca cliente.
