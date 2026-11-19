@@ -4,7 +4,7 @@ import type { CambioMotor, Datos, Motor } from './tipos';
 
 type Motores = Pick<Datos, 'listarMotores' | 'actualizarMotor' | 'historialMotor'>;
 
-const aMotor = (f: any): Motor => ({
+export const aMotor = (f: any): Motor => ({
   id: f.id,
   codigo: f.codigo,
   nombre: f.nombre,

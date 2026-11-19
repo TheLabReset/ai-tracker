@@ -159,6 +159,122 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"preguntas": {
+                  Row: {
+                    "activa": boolean,"categoria": string | null,"codigo": string,"id": string,"proyecto_id": string,"reemplaza_a": string | null,"set": string,"texto": string,"tipo": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "activa"?: boolean,"categoria"?: string | null,"codigo": string,"id"?: string,"proyecto_id": string,"reemplaza_a"?: string | null,"set": string,"texto": string,"tipo": string,"version"?: number
+                  }
+                  Update: {
+                    "activa"?: boolean,"categoria"?: string | null,"codigo"?: string,"id"?: string,"proyecto_id"?: string,"reemplaza_a"?: string | null,"set"?: string,"texto"?: string,"tipo"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "preguntas_proyecto_id_fkey"
+      columns: ["proyecto_id"]
+isOneToOne: false
+      referencedRelation: "proyectos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "preguntas_reemplaza_a_fkey"
+      columns: ["reemplaza_a"]
+isOneToOne: false
+      referencedRelation: "preguntas"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proyecto_competidores": {
+                  Row: {
+                    "marca_id": string,"orden": number,"proyecto_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "marca_id": string,"orden": number,"proyecto_id": string
+                  }
+                  Update: {
+                    "marca_id"?: string,"orden"?: number,"proyecto_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proyecto_competidores_marca_id_fkey"
+      columns: ["marca_id"]
+isOneToOne: false
+      referencedRelation: "marcas"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proyecto_competidores_proyecto_id_fkey"
+      columns: ["proyecto_id"]
+isOneToOne: false
+      referencedRelation: "proyectos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proyecto_motores": {
+                  Row: {
+                    "motor_id": string,"proyecto_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "motor_id": string,"proyecto_id": string
+                  }
+                  Update: {
+                    "motor_id"?: string,"proyecto_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proyecto_motores_motor_id_fkey"
+      columns: ["motor_id"]
+isOneToOne: false
+      referencedRelation: "motores"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proyecto_motores_proyecto_id_fkey"
+      columns: ["proyecto_id"]
+isOneToOne: false
+      referencedRelation: "proyectos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proyectos": {
+                  Row: {
+                    "cadencia": string,"categorias_extra": (string)[],"competidor_principal_id": string | null,"creado_por": string | null,"dia_semana": number,"estado": string,"hora": string,"id": string,"marca_id": string,"muestras": number,"pesos": NonNullable<Json>,"sector_id": string,"tope_gasto_mensual": number | null,"zona_horaria": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cadencia"?: string,"categorias_extra"?: (string)[],"competidor_principal_id"?: string | null,"creado_por"?: string | null,"dia_semana"?: number,"estado"?: string,"hora"?: string,"id"?: string,"marca_id": string,"muestras"?: number,"pesos"?: NonNullable<Json>,"sector_id": string,"tope_gasto_mensual"?: number | null,"zona_horaria"?: string
+                  }
+                  Update: {
+                    "cadencia"?: string,"categorias_extra"?: (string)[],"competidor_principal_id"?: string | null,"creado_por"?: string | null,"dia_semana"?: number,"estado"?: string,"hora"?: string,"id"?: string,"marca_id"?: string,"muestras"?: number,"pesos"?: NonNullable<Json>,"sector_id"?: string,"tope_gasto_mensual"?: number | null,"zona_horaria"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proyectos_competidor_principal_id_fkey"
+      columns: ["competidor_principal_id"]
+isOneToOne: false
+      referencedRelation: "marcas"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proyectos_creado_por_fkey"
+      columns: ["creado_por"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proyectos_marca_id_fkey"
+      columns: ["marca_id"]
+isOneToOne: true
+      referencedRelation: "marcas"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proyectos_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"sectores": {
                   Row: {
                     "categoria": string,"id": string,"idioma": string,"nombre": string,"pais": string
@@ -207,6 +323,9 @@ isOneToOne: false
                            },
 "crear_marca":
 { Args: { "datos": Json,"sector": string }; Returns: string
+                           },
+"crear_proyecto":
+{ Args: { "d": Json }; Returns: string
                            },
 "es_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean

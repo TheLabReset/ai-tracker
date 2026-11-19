@@ -7,9 +7,9 @@ type Catalogo = Pick<
   'listarSectores' | 'crearSector' | 'listarMarcas' | 'crearMarca' | 'agregarAlias' | 'quitarAlias'
 >;
 
-const aSector = (f: any): Sector => ({ id: f.id, nombre: f.nombre, categoria: f.categoria });
+export const aSector = (f: any): Sector => ({ id: f.id, nombre: f.nombre, categoria: f.categoria });
 const aAlias = (f: any): AliasGuardado => ({ id: f.id, texto: f.texto, ambiguo: f.ambiguo });
-const aMarca = (f: any): Marca => ({
+export const aMarca = (f: any): Marca => ({
   id: f.id,
   sectorId: f.sector_id,
   nombre: f.nombre,

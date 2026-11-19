@@ -2,6 +2,7 @@ import { crearCatalogo } from './catalogo';
 import type { ClienteTracker } from './cliente';
 import { crearMotores } from './motores';
 import { crearPlantillas } from './plantillas';
+import { crearProyectos } from './proyectos';
 import { crearSesion } from './sesion';
 import type { Datos } from './tipos';
 import { crearUsuarios } from './usuarios';
@@ -14,5 +15,6 @@ export function crearDatos(cliente: ClienteTracker): Datos {
     ...crearCatalogo(cliente),
     ...crearMotores(cliente),
     ...crearPlantillas(cliente),
+    ...crearProyectos(cliente, sesion.sesionActual),
   };
 }

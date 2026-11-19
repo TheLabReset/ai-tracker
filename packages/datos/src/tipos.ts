@@ -1,4 +1,4 @@
-import type { TipoPregunta } from '@lab/nucleo';
+import type { Cadencia, Pesos, TipoPregunta } from '@lab/nucleo';
 
 export type RolMarca = 'lider' | 'responsable' | 'planning' | 'lector';
 
@@ -96,6 +96,62 @@ export interface Plantilla {
   texto: string;
 }
 
+export type EstadoProyecto = 'activo' | 'pausado' | 'archivado';
+export type SetPregunta = 'compat' | 'extendido' | 'propia';
+
+export interface PreguntaProyecto {
+  id: string;
+  codigo: string;
+  tipo: TipoPregunta;
+  set: SetPregunta;
+  categoria: string | null;
+  texto: string;
+  version: number;
+}
+
+export interface Proyecto {
+  id: string;
+  marca: Marca;
+  sector: Sector;
+  categoriasExtra: string[];
+  competidores: Marca[];
+  competidorPrincipalId: string | null;
+  motores: Motor[];
+  preguntas: PreguntaProyecto[];
+  cadencia: Cadencia;
+  diaSemana: number;
+  hora: string;
+  muestras: number;
+  pesos: Pesos;
+  topeGastoMensual: number | null;
+  estado: EstadoProyecto;
+}
+
+export interface ResumenProyecto {
+  id: string;
+  marcaNombre: string;
+  sectorNombre: string;
+  estado: EstadoProyecto;
+  miRol: RolMarca | 'admin';
+}
+
+export interface DatosAlta {
+  marca: NuevaMarca & { empresaId: 'reset' | 'wanted' };
+  sector: { id: string } | { nombre: string; categoria: string };
+  categoriasExtra: string[];
+  competidores: Array<{ id: string } | NuevaMarca>;
+  competidorPrincipal: number;
+  preguntas: Array<{ codigo: string; tipo: TipoPregunta; set: SetPregunta; categoria: string | null; texto: string }>;
+  motorIds: string[];
+  cadencia: Cadencia;
+  diaSemana: number;
+  hora: string;
+  muestras: number;
+  topeGastoMensual: number | null;
+  liderId?: string;
+  responsableId?: string;
+}
+
 export interface Datos {
   entrar(correo: string, clave: string): Promise<Perfil>;
   sesionActual(): Promise<Perfil | null>;
@@ -121,4 +177,7 @@ export interface Datos {
   historialMotor(id: string): Promise<CambioMotor[]>;
   listarPlantillas(sectorId?: string): Promise<Plantilla[]>;
   crearPlantilla(p: { codigo: string; sectorId: string; tipo: TipoPregunta; texto: string }): Promise<Plantilla>;
+  crearProyecto(d: DatosAlta): Promise<string>;
+  listarProyectos(): Promise<ResumenProyecto[]>;
+  obtenerProyecto(id: string): Promise<Proyecto>;
 }
