@@ -13,7 +13,7 @@ export function crearBitacora(cliente: ClienteTracker): Bitacora {
     listarBitacora: (o = {}) =>
       conTraduccion(async () => {
         if (!comprobar(await cliente.rpc('es_admin'))) throw sinPermiso();
-        const limite = Math.min(Math.max(Math.trunc(o.limite ?? LIMITE_POR_DEFECTO), 1), LIMITE_MAXIMO);
+        const limite = Math.min(Math.max(Math.trunc(Number.isFinite(o.limite) ? o.limite! : LIMITE_POR_DEFECTO), 1), LIMITE_MAXIMO);
         let consulta = cliente.from('bitacora').select('*').order('fecha', { ascending: false }).order('id', { ascending: false });
         if (o.entidad) consulta = consulta.eq('entidad', o.entidad);
         const filas = comprobarLista(await consulta.limit(limite));
