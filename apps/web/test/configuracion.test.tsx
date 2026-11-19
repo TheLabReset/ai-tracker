@@ -105,6 +105,42 @@ describe('configuración de la marca', () => {
     expect(screen.getByText('Hasta 5 competidores.')).toBeInTheDocument();
     expect(screen.getByLabelText('A4')).not.toBeChecked();
   });
+  it('si falla el principal, refresca los competidores guardados y lo dice', async () => {
+    const { datos, proyectoId } = await proyectoDePrueba({ rol: 'admin' });
+    const original = datos.obtenerProyecto.bind(datos);
+    let lecturas = 0;
+    datos.obtenerProyecto = async (id) => {
+      lecturas++;
+      return original(id);
+    };
+    datos.actualizarProyecto = async () => {
+      throw new ErrorDatos('datos_invalidos', 'El principal no es válido.');
+    };
+    renderConDatos(<Configuracion />, { datos, ruta: `/marcas/${proyectoId}/configuracion`, patron: PATRON });
+    await userEvent.click(await screen.findByLabelText('Skechers'));
+    await userEvent.selectOptions(screen.getByLabelText('Competidor principal (para P2)'), 'Skechers');
+    const antes = lecturas;
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar competidores' }));
+    expect(await screen.findByText('Guardamos los competidores, pero no el principal: El principal no es válido.')).toBeInTheDocument();
+    expect(lecturas).toBeGreaterThan(antes);
+    expect((await original(proyectoId)).competidores).toHaveLength(2);
+  });
+  it('un competidor que no está en el catálogo del sector se ve marcado y cuenta para el tope', async () => {
+    const { datos, proyectoId } = await proyectoDePrueba({ rol: 'admin' });
+    const base = datos.estado.marcas.find((m) => m.nombre === 'Skechers')!;
+    for (const n of ['A1', 'A2', 'A3', 'A4']) datos.estado.marcas.push({ ...structuredClone(base), id: crypto.randomUUID(), nombre: n });
+    const listar = datos.listarMarcas.bind(datos);
+    datos.listarMarcas = async (id) => (await listar(id)).filter((m) => m.nombre !== 'Footloose');
+    renderConDatos(<Configuracion />, { datos, ruta: `/marcas/${proyectoId}/configuracion`, patron: PATRON });
+    expect(await screen.findByLabelText('Footloose')).toBeChecked();
+    for (const n of ['A1', 'A2', 'A3', 'A4']) await userEvent.click(screen.getByLabelText(n));
+    expect(screen.getByLabelText('A4')).toBeChecked();
+    await userEvent.click(screen.getByLabelText('Skechers'));
+    expect(screen.getByText('Hasta 5 competidores.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Skechers')).not.toBeChecked();
+    await userEvent.click(screen.getByLabelText('Footloose'));
+    expect(screen.getByLabelText('Footloose')).not.toBeChecked();
+  });
   it('guarda motores y cadencia', async () => {
     const { datos, proyectoId } = await abrir('admin');
     await userEvent.selectOptions(await screen.findByLabelText('Cadencia'), 'Quincenal');

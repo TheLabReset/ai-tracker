@@ -1,4 +1,4 @@
-import type { Proyecto } from '@lab/datos';
+import { ErrorDatos, type Proyecto } from '@lab/datos';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { estiloBotonMod } from '../../app/estilos';
@@ -18,7 +18,13 @@ export function Competidores({ proyecto, puedeEditar }: { proyecto: Proyecto; pu
     proyecto.id,
     async (c: { ids: string[]; principalId: string }) => {
       await datos.cambiarCompetidores(proyecto.id, c.ids);
-      if (c.principalId !== proyecto.competidorPrincipalId) await datos.actualizarProyecto(proyecto.id, { competidorPrincipalId: c.principalId });
+      if (c.principalId === proyecto.competidorPrincipalId) return;
+      try {
+        await datos.actualizarProyecto(proyecto.id, { competidorPrincipalId: c.principalId });
+      } catch (falla) {
+        const detalle = falla instanceof ErrorDatos ? falla.message : 'inténtalo de nuevo';
+        throw new ErrorDatos(falla instanceof ErrorDatos ? falla.codigo : 'otro', `Guardamos los competidores, pero no el principal: ${detalle}`);
+      }
     },
     'Competidores guardados.',
   );
@@ -44,7 +50,8 @@ export function Competidores({ proyecto, puedeEditar }: { proyecto: Proyecto; pu
     );
   }
 
-  const ofrecidas = (catalogo.data ?? []).filter((m) => m.id !== proyecto.marca.id);
+  const delCatalogo = (catalogo.data ?? []).filter((m) => m.id !== proyecto.marca.id);
+  const ofrecidas = [...delCatalogo, ...proyecto.competidores.filter((c) => !delCatalogo.some((m) => m.id === c.id))];
   const seleccion = ofrecidas.filter((m) => elegidos.includes(m.id));
   const principalVisible = seleccion.some((m) => m.id === principal) ? principal! : (seleccion[0]?.id ?? '');
 

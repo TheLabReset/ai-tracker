@@ -12,10 +12,8 @@ export function useCambio<V = void>(proyectoId: string, accion: (v: V) => Promis
       setError(null);
       setAviso(null);
     },
-    onSuccess: async () => {
-      await Promise.all([cliente.invalidateQueries({ queryKey: ['proyecto', proyectoId] }), cliente.invalidateQueries({ queryKey: ['proyectos'] })]);
-      setAviso(exito);
-    },
+    onSuccess: () => setAviso(exito),
+    onSettled: () => Promise.all([cliente.invalidateQueries({ queryKey: ['proyecto', proyectoId] }), cliente.invalidateQueries({ queryKey: ['proyectos'] })]),
     onError: (falla) => setError(falla instanceof ErrorDatos ? falla.message : 'No pudimos guardar. Inténtalo de nuevo.'),
   });
   return { ejecutar: mutacion.mutate, pendiente: mutacion.isPending, error, aviso };
