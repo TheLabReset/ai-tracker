@@ -7,6 +7,7 @@ import { puedeCrearMarcas } from '../app/guardas';
 import { useDatos } from '../app/proveedores';
 import { estiloCampo } from '../sesion/MarcoAcceso';
 import { useSesion } from '../sesion/useSesion';
+import { Plantillas } from './Plantillas';
 import { CampoAlias, CampoTermino, type TerminoEditable } from './CampoAlias';
 
 const VACIO: TerminoEditable = { texto: '', ambiguo: false };
@@ -262,7 +263,7 @@ export function Catalogo() {
         ))}
       </div>
       <div role="tabpanel" id={`panel-${pestana}`} aria-labelledby={`pestana-${pestana}`}>
-        {pestana === 'marcas' ? <PanelMarcas sectorId={sector.id} /> : <p className="text-tinta-2">Las plantillas de este sector llegan pronto.</p>}
+        {pestana === 'marcas' ? <PanelMarcas sectorId={sector.id} /> : <Plantillas sectorId={sector.id} />}
       </div>
     </div>
   );
