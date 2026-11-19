@@ -36,7 +36,7 @@ function Asistido({ perfil }: { perfil: Perfil }) {
           </li>
         ))}
       </ol>
-      <h2 className="font-display text-(length:--t-24) uppercase">{etiqueta(paso)}</h2>
+      <h2 className="font-display text-(length:--t-26) uppercase">{etiqueta(paso)}</h2>
       <Paso borrador={borrador} despachar={despachar} />
       <div className="flex gap-e4">
         {paso > 1 && (
