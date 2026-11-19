@@ -58,14 +58,14 @@ export function PasoPreguntas({ borrador, despachar }: PropsPaso) {
   return (
     <div className="flex max-w-[40rem] flex-col gap-e4">
       <ul className="flex flex-col gap-e2">
-        {preguntas.map((p) => (
+        {preguntas.map((p, n) => (
           <li key={p.codigo} className="flex flex-col gap-e1 rounded-card bg-capsula p-e4">
             <div className="flex items-center justify-between gap-e4 text-(length:--t-14) text-tinta-2">
               <span>
                 <span className="font-semibold">{p.codigo}</span> · <span>{p.set === 'compat' ? 'Ficha' : p.set === 'propia' ? 'Propia' : p.categoria}</span>
               </span>
               {p.set === 'propia' && (
-                <button type="button" onClick={() => despachar({ tipo: 'quitarPreguntaPropia', indice: Number(p.codigo.slice(1)) - 1 })} className={estiloBotonLinea}>
+                <button type="button" onClick={() => despachar({ tipo: 'quitarPreguntaPropia', indice: n - (preguntas.length - borrador.preguntasPropias.length) })} className={estiloBotonLinea}>
                   Quitar pregunta {p.codigo}
                 </button>
               )}

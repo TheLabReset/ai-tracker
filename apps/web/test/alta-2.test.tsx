@@ -88,4 +88,21 @@ describe('alta de marca · pasos 3 a 5', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Quitar pregunta X1' }));
     expect(screen.queryByText('¿Dónde compro zapatos?')).not.toBeInTheDocument();
   });
+  it('si la marca cliente pasa a llamarse como un competidor marcado, lo quita', async () => {
+    renderConDatos(<Asistente />, { datos: datosDeAlta() });
+    await hastaCompetidores();
+    await userEvent.click(screen.getByLabelText('Footloose'));
+    await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
+    await userEvent.clear(screen.getByLabelText('Nombre de la marca'));
+    await userEvent.type(screen.getByLabelText('Nombre de la marca'), 'Footloose');
+    for (let i = 0; i < 3; i++) await userEvent.click(screen.getByRole('button', { name: 'Seguir' }));
+    expect(await screen.findByText('Quitamos «Footloose» de los competidores: es la marca que estás dando de alta.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Competidor principal (para P2)')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Seguir' })).toBeDisabled();
+    await userEvent.click(screen.getByLabelText('Skechers'));
+    await userEvent.click(screen.getByRole('button', { name: 'Seguir' }));
+    expect(screen.getByText('¿Footloose o Skechers? ¿Cuál me conviene?')).toBeInTheDocument();
+  });
 });

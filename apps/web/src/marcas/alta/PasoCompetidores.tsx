@@ -1,7 +1,7 @@
 import type { NuevaMarca } from '@lab/datos';
 import { claveMarca } from '@lab/nucleo';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { estiloBotonLinea, estiloBotonMod } from '../../app/estilos';
 import { useDatos } from '../../app/proveedores';
 import { CampoAlias, CampoTermino, type TerminoEditable } from '../../sectores/CampoAlias';
@@ -48,6 +48,17 @@ export function PasoCompetidores({ borrador, despachar }: PropsPaso) {
   const elegida = (id: string) => borrador.competidores.some((c) => 'id' in c && c.id === id);
   const lleno = borrador.competidores.length >= MAX_COMPETIDORES;
   const avisoLimite = 'Hasta 5 competidores.';
+  const [quitados, setQuitados] = useState<string[]>([]);
+  const revisado = useRef<unknown>(null);
+
+  useEffect(() => {
+    if (sectorId !== null && !marcas.data) return;
+    const sobran = borrador.competidores.flatMap((c, i) => (claveMarca(nombreDelCompetidor(c, catalogo)) === claveCliente ? [i] : []));
+    if (sobran.length === 0 || revisado.current === borrador.competidores) return;
+    revisado.current = borrador.competidores;
+    setQuitados((q) => [...q, ...sobran.map((i) => nombreDelCompetidor(borrador.competidores[i]!, catalogo))]);
+    for (const i of sobran.reverse()) despachar({ tipo: 'quitarCompetidor', indice: i });
+  });
 
   function alternar(id: string) {
     if (!elegida(id) && lleno) return setAviso(avisoLimite);
@@ -93,6 +104,11 @@ export function PasoCompetidores({ borrador, despachar }: PropsPaso) {
           </li>
         ))}
       </ul>
+      {quitados.map((n, i) => (
+        <p key={i} role="status" className={estiloAviso}>
+          Quitamos «{n}» de los competidores: es la marca que estás dando de alta.
+        </p>
+      ))}
       {aviso && (
         <p role="status" className={estiloAviso}>
           {aviso}
