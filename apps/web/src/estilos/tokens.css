@@ -1,0 +1,140 @@
+:root {
+  /* fondos y superficies */
+  --fondo: #000;
+  --hundido: #0a0a0a;
+  --capsula: #141414;
+  --realce: #1a1a1a;
+  --control: #1f1f1f;
+  --hover: #2a2a2a;
+  --linea: #2a2a2a;
+  --borde: #333;
+  --vidrio: #2222248c;
+  --vidrio-borde: #ffffff1a;
+
+  /* texto */
+  --tinta: #f5f5f5;
+  --tinta-2: #b3b3b3;
+  --tinta-3: #9a9893;
+  --tinta-4: #666;
+  --tinta-sobre-claro: #000;
+
+  /* estados */
+  --neon: #0dff66;
+  --ok: #0dff66;
+  --error: #ff0080;
+  --magenta: #ff0080;
+  --info: #00e5ff;
+  --cian: #00e5ff;
+  --inestable: #facc15;
+  --desactualizado: #facc15;
+  --caido: #ef4444;
+  --bloquea: #ff6b5c;
+
+  /* otros acentos */
+  --azul: #0052cc;
+  --azul-claro: #00a3ff;
+  --violeta: #6f42c1;
+  --violeta-texto: #8a63dd;
+  --purpura: #9b59b6;
+  --gris-serie: #666;
+
+  /* color por herramienta */
+  --mod: #f2ff5a;
+  --mod-texto: #f2ff5a;
+  --mod-tinta: #000;
+
+  /* láminas */
+  --lamina-fondo: #fff;
+  --lamina-tinta: #111;
+  --lamina-cuerpo: #333;
+  --lamina-parrafo: #444;
+  --lamina-sub: #555;
+  --lamina-linea: #e5e5e5;
+  --papel: #f5f5f5;
+  --papel-acento: #5b34a8;
+
+  /* tipografía */
+  --fuente-display: 'Bebas Neue', sans-serif;
+  --fuente-cuerpo: 'Montserrat', system-ui, sans-serif;
+  --fuente-mono: ui-monospace, monospace;
+  --t-12: 12px;
+  --t-14: 14px;
+  --t-16: 16px;
+  --t-20: 20px;
+  --t-26: 26px;
+  --t-32: 32px;
+  --t-40: 40px;
+  --t-72: 72px;
+  --t-112: 112px;
+  --interlineado-cuerpo: 1.5;
+  --interlineado-titulo: 1.05;
+  --interlineado-display: 1;
+  --espaciado-accion: 0.04em;
+  --espaciado-display: 0.01em;
+  --espaciado-etiqueta: 0.08em;
+
+  /* espaciado */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-6: 24px;
+  --e-8: 32px;
+  --e-12: 48px;
+  --e-16: 64px;
+  --e-24: 96px;
+
+  /* radios */
+  --r-casilla: 4px;
+  --r-formulario: 12px;
+  --r-flotante: 22px;
+  --r-card: 28px;
+  --r-capsula: 40px;
+  --r-pildora: 9999px;
+
+  /* alturas */
+  --alto-control: 44px;
+  --alto-control-chico: 32px;
+  --alto-accion: 52px;
+  --alto-nav: 44px;
+  --alto-ruta: 48px;
+  --ancho-contenido: 1440px;
+  --margen-lateral: 16px;
+
+  /* sombras */
+  --s-card: 0 2px 8px #0006, 0 12px 40px #00000073;
+  --s-flota: 0 8px 32px #0006;
+  --s-popover: 0 16px 40px #0009;
+  --s-cubre: 0 24px 64px #0009;
+
+  /* movimiento */
+  --mov-entrar-curva: cubic-bezier(0.2, 0, 0, 1);
+  --mov-entrar: 0.3s;
+  --mov-salir-curva: cubic-bezier(0.4, 0, 1, 1);
+  --mov-salir: 0.2s;
+  --mov-momento-curva: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mov-revelar: 0.45s;
+  --mov-pantalla: 0.6s;
+
+  /* foco */
+  --foco: var(--mod);
+  --foco-anillo: 0 0 0 2px var(--fondo), 0 0 0 4px var(--foco);
+
+  /* capas */
+  --z-base: 0;
+  --z-pegado: 10;
+  --z-header: 50;
+  --z-flotante: 100;
+  --z-modal: 200;
+  --z-sobre-modal: 300;
+  --z-aviso: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mov-entrar: 0s;
+    --mov-salir: 0s;
+    --mov-revelar: 0s;
+    --mov-pantalla: 0s;
+  }
+}

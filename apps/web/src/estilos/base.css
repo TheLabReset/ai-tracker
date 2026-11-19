@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@theme inline {
+  --color-fondo: var(--fondo);
+  --color-hundido: var(--hundido);
+  --color-capsula: var(--capsula);
+  --color-realce: var(--realce);
+  --color-control: var(--control);
+  --color-linea: var(--linea);
+  --color-borde: var(--borde);
+  --color-tinta: var(--tinta);
+  --color-tinta-2: var(--tinta-2);
+  --color-tinta-3: var(--tinta-3);
+  --color-tinta-4: var(--tinta-4);
+  --color-ok: var(--ok);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-inestable: var(--inestable);
+  --color-caido: var(--caido);
+  --color-bloquea: var(--bloquea);
+  --color-mod: var(--mod);
+  --color-mod-tinta: var(--mod-tinta);
+  --font-display: var(--fuente-display);
+  --font-cuerpo: var(--fuente-cuerpo);
+  --font-mono: var(--fuente-mono);
+  --radius-casilla: var(--r-casilla);
+  --radius-formulario: var(--r-formulario);
+  --radius-flotante: var(--r-flotante);
+  --radius-card: var(--r-card);
+  --radius-capsula: var(--r-capsula);
+  --radius-pildora: var(--r-pildora);
+  --spacing-e1: var(--e-1);
+  --spacing-e2: var(--e-2);
+  --spacing-e3: var(--e-3);
+  --spacing-e4: var(--e-4);
+  --spacing-e6: var(--e-6);
+  --spacing-e8: var(--e-8);
+  --spacing-e12: var(--e-12);
+  --spacing-e16: var(--e-16);
+  --spacing-e24: var(--e-24);
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--fuente-cuerpo);
+  line-height: var(--interlineado-cuerpo);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--foco-anillo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
