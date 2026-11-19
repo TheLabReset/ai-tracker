@@ -92,6 +92,14 @@ function initcap(texto: string): string {
   return texto.toLowerCase().replace(/[a-z0-9áéíóúñü]+/g, (p) => p[0]!.toUpperCase() + p.slice(1));
 }
 
+function restaurar(estado: EstadoEnMemoria, copia: Omit<EstadoEnMemoria, 'sesion'>) {
+  for (const [clave, valor] of Object.entries(copia)) {
+    const actual = (estado as unknown as Record<string, unknown>)[clave];
+    if (Array.isArray(actual) && Array.isArray(valor)) actual.splice(0, actual.length, ...valor);
+    else (estado as unknown as Record<string, unknown>)[clave] = valor;
+  }
+}
+
 export function crearContexto(estado: EstadoEnMemoria) {
   let tick = 0;
   const ahora = () => new Date(Date.parse(INICIO) + ++tick * 1000).toISOString();
@@ -150,7 +158,7 @@ export function crearContexto(estado: EstadoEnMemoria) {
     try {
       return structuredClone(fn(u));
     } catch (e) {
-      Object.assign(estado, copia);
+      restaurar(estado, copia);
       throw e;
     }
   };

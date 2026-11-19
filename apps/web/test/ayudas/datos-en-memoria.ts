@@ -25,6 +25,25 @@ export interface Semilla {
   marcas?: Marca[];
 }
 
+function armar(estado: EstadoEnMemoria): Datos & { estado: EstadoEnMemoria } {
+  const ctx = crearContexto(estado);
+  return {
+    estado,
+    ...crearSesion(ctx),
+    ...crearUsuarios(ctx),
+    ...crearCatalogo(ctx),
+    ...crearMotores(ctx),
+    ...crearPlantillas(ctx),
+    ...crearProyectos(ctx),
+    ...crearEdicion(ctx),
+    ...crearBitacora(ctx),
+  };
+}
+
+export function otraSesion(datos: { estado: EstadoEnMemoria }, correo: string): Datos & { estado: EstadoEnMemoria } {
+  return armar({ ...datos.estado, sesion: correo.trim().toLowerCase() });
+}
+
 export function crearDatosEnMemoria(semilla: Semilla = {}): Datos & { estado: EstadoEnMemoria } {
   const usuarios = (semilla.usuarios ?? []).map((u) => ({ id: crypto.randomUUID(), correo: u.correo.trim().toLowerCase(), clave: u.clave, admin: u.admin ?? false }));
   const estado: EstadoEnMemoria = {
@@ -44,18 +63,7 @@ export function crearDatosEnMemoria(semilla: Semilla = {}): Datos & { estado: Es
     clavesNuevas: [],
     intentosDeEntrada: 0,
   };
-  const ctx = crearContexto(estado);
-  return {
-    estado,
-    ...crearSesion(ctx),
-    ...crearUsuarios(ctx),
-    ...crearCatalogo(ctx),
-    ...crearMotores(ctx),
-    ...crearPlantillas(ctx),
-    ...crearProyectos(ctx),
-    ...crearEdicion(ctx),
-    ...crearBitacora(ctx),
-  };
+  return armar(estado);
 }
 
 export function sectorConMarcas(
