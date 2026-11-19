@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { App } from '../src/app/App';
@@ -51,6 +51,27 @@ describe('shell', () => {
     expect(await screen.findByRole('heading', { name: 'Usuarios' })).toBeInTheDocument();
     expect(screen.getByText('Powered by The Lab')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Admin' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('desde Motores el admin llega a Usuarios y a Bitácora por la navegación de Admin', async () => {
+    renderConDatos(<App />, { datos: conSesion(true), ruta: '/admin/motores' });
+    expect(await screen.findByRole('heading', { name: 'Motores' })).toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: 'Admin' });
+    expect(within(nav).getByRole('link', { name: 'Motores' })).toHaveAttribute('aria-current', 'page');
+    await userEvent.click(within(nav).getByRole('link', { name: 'Usuarios' }));
+    expect(await screen.findByRole('heading', { name: 'Usuarios' })).toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', { name: 'Admin' })).getByRole('link', { name: 'Usuarios' })).toHaveAttribute('aria-current', 'page');
+    await userEvent.click(within(screen.getByRole('navigation', { name: 'Admin' })).getByRole('link', { name: 'Bitácora' }));
+    expect(await screen.findByRole('heading', { name: 'Bitácora' })).toBeInTheDocument();
+    const final = screen.getByRole('navigation', { name: 'Admin' });
+    expect(within(final).getByRole('link', { name: 'Bitácora' })).toHaveAttribute('aria-current', 'page');
+    expect(within(final).getByRole('link', { name: 'Motores' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('fuera de Admin no se muestra la navegación de Admin', async () => {
+    renderConDatos(<App />, { datos: conSesion(true), ruta: '/' });
+    expect(await screen.findByRole('link', { name: 'Admin' })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Admin' })).toBeNull();
   });
 
   it('si falla la carga de proyectos, avisa y permite reintentar en vez de mostrar el estado vacío', async () => {

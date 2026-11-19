@@ -3,6 +3,7 @@ import { Link, Route, Routes } from 'react-router';
 import { Consolidado } from '../consolidado/Consolidado';
 import { Bitacora } from '../admin/Bitacora';
 import { Motores } from '../admin/Motores';
+import { NavAdmin } from '../admin/NavAdmin';
 import { Usuarios } from '../admin/Usuarios';
 import { Configuracion } from '../marcas/Configuracion';
 import { Asistente } from '../marcas/alta/Asistente';
@@ -31,9 +32,9 @@ export function RutasInternas() {
       <Route path="/sectores/:sectorId" element={<Catalogo />} />
       <Route path="/marcas/nueva" element={<Asistente />} />
       <Route path="/marcas/:proyectoId/configuracion" element={<><AvisoDeNavegacion /><Configuracion /></>} />
-      <Route path="/admin/motores" element={<SoloAdmin><Motores /></SoloAdmin>} />
-      <Route path="/admin/usuarios" element={<SoloAdmin><Usuarios /></SoloAdmin>} />
-      <Route path="/admin/bitacora" element={<SoloAdmin><Bitacora /></SoloAdmin>} />
+      <Route path="/admin/motores" element={<SoloAdmin><NavAdmin /><Motores /></SoloAdmin>} />
+      <Route path="/admin/usuarios" element={<SoloAdmin><NavAdmin /><Usuarios /></SoloAdmin>} />
+      <Route path="/admin/bitacora" element={<SoloAdmin><NavAdmin /><Bitacora /></SoloAdmin>} />
       <Route path="*" element={<NoEncontrada />} />
     </Routes>
   );
