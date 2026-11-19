@@ -15,6 +15,15 @@ function Consolidado() {
   const { perfil } = useSesion();
   const proyectos = useQuery({ queryKey: ['proyectos'], queryFn: () => datos.listarProyectos() });
   if (proyectos.isPending) return <p role="status">Cargando…</p>;
+  if (proyectos.isError)
+    return (
+      <div role="alert" className="flex flex-col items-start gap-e4 py-e8">
+        <p className="text-error">No pudimos cargar tus marcas.</p>
+        <button type="button" onClick={() => proyectos.refetch()} className="rounded-pildora bg-mod px-e6 py-e2 font-bold text-mod-tinta">
+          Reintentar
+        </button>
+      </div>
+    );
   if (proyectos.data && proyectos.data.length > 0) return <Pantalla titulo="Consolidado" />;
   return (
     <div className="flex flex-col items-start gap-e4 py-e8">

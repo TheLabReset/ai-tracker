@@ -17,6 +17,7 @@ export function useSesion() {
     },
     async salir() {
       await datos.salir();
+      cliente.removeQueries({ predicate: (q) => q.queryKey[0] !== CLAVE_SESION[0] });
       cliente.setQueryData(CLAVE_SESION, null);
     },
   };
