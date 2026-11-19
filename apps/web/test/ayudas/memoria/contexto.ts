@@ -69,6 +69,7 @@ export interface EstadoEnMemoria {
   bitacora: EntradaBitacora[];
   recuperaciones: string[];
   clavesNuevas: string[];
+  intentosDeEntrada: number;
 }
 
 export const INICIO = '2026-11-18T00:00:00.000Z';

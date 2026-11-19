@@ -15,7 +15,7 @@ function mensajeClave(error: { name?: string; code?: string }): string {
   return 'No pudimos guardar tu contraseña. Inténtalo de nuevo.';
 }
 
-export function crearSesion(cliente: ClienteTracker): Sesion {
+export function crearSesion(cliente: ClienteTracker, urlApp?: string): Sesion {
   async function sincronizar(): Promise<Perfil> {
     return comprobar(await cliente.rpc('sincronizar_perfil')) as unknown as Perfil;
   }
@@ -45,7 +45,10 @@ export function crearSesion(cliente: ClienteTracker): Sesion {
     pedirRecuperacion: (correo) =>
       conTraduccion(async () => {
         if (!esCorreoPermitido(correo)) throw correoNoPermitido();
-        const { error } = await cliente.auth.resetPasswordForEmail(correo.trim());
+        const { error } = await cliente.auth.resetPasswordForEmail(
+          correo.trim(),
+          urlApp ? { redirectTo: `${urlApp}/crear-password` } : undefined,
+        );
         if (error) throw error;
       }),
     crearClave: (clave) =>

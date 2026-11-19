@@ -17,7 +17,9 @@ if (!url || !clave) {
   throw new Error('Faltan VITE_SUPABASE_URL y VITE_SUPABASE_CLAVE. Cópialas desde .env.example a .env.');
 }
 
-const datos = crearDatos(crearClienteTracker(url, clave, { persistirSesion: true }));
+const datos = crearDatos(crearClienteTracker(url, clave, { persistirSesion: true }), {
+  urlApp: window.location.origin,
+});
 
 createRoot(document.getElementById('raiz')!).render(
   <StrictMode>

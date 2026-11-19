@@ -42,6 +42,7 @@ export function crearDatosEnMemoria(semilla: Semilla = {}): Datos & { estado: Es
     bitacora: [],
     recuperaciones: [],
     clavesNuevas: [],
+    intentosDeEntrada: 0,
   };
   const ctx = crearContexto(estado);
   return {

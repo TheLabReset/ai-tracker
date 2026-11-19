@@ -1,11 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
-import { useDatos } from './proveedores';
+import { Route, Routes } from 'react-router';
+import { CrearClave } from '../sesion/CrearClave';
+import { PantallaAcceso } from '../sesion/PantallaAcceso';
+import { useSesion } from '../sesion/useSesion';
+
+function Inicio() {
+  const { perfil, salir } = useSesion();
+  if (!perfil) return <PantallaAcceso />;
+  return (
+    <nav aria-label="Principal">
+      <h1>The Lab AI Tracker</h1>
+      <button type="button" onClick={salir}>
+        Salir
+      </button>
+    </nav>
+  );
+}
 
 export function App() {
-  const datos = useDatos();
-  const sesion = useQuery({ queryKey: ['sesion'], queryFn: () => datos.sesionActual() });
-
-  if (sesion.isPending) return <p>Cargando…</p>;
-  if (!sesion.data) return <h1>Entra con tu correo de Reset o Wanted</h1>;
-  return <h1>The Lab AI Tracker</h1>;
+  return (
+    <Routes>
+      <Route path="/crear-password" element={<CrearClave />} />
+      <Route path="*" element={<Inicio />} />
+    </Routes>
+  );
 }

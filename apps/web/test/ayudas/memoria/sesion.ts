@@ -11,6 +11,7 @@ export function crearSesion(ctx: Contexto): Sesion {
   return {
     entrar: async (correo, clave) => {
       if (!esCorreoPermitido(correo)) throw noPermitido();
+      estado.intentosDeEntrada++;
       const usuario = estado.usuarios.find((u) => igual(u.correo, correo));
       if (!usuario || usuario.clave !== clave) throw new ErrorDatos('credenciales', 'Correo o clave incorrectos.');
       if (estado.admins.some((a) => igual(a, usuario.correo))) usuario.admin = true;
