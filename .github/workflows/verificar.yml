@@ -52,3 +52,47 @@ jobs:
       - name: Apagar Supabase
         if: always()
         run: pnpm exec supabase stop --no-backup
+
+  publicar:
+    needs: verificar
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # La URL y la clave publicable de Supabase son públicas por diseño
+      - name: Construir la web
+        env:
+          BASE_PATH: /the-lab-ai-tracker/
+          VITE_SUPABASE_URL: https://glthjfxprnozztuanjlf.supabase.co
+          VITE_SUPABASE_CLAVE: sb_publishable_epDm4hk-o0JIVxgpEO4jrg_POPqBp9C
+        run: |
+          pnpm -C apps/web build
+          cp apps/web/dist/index.html apps/web/dist/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+      - id: despliegue
+        uses: actions/deploy-pages@v4

@@ -10,6 +10,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { App } from './app/App';
 import { Proveedores } from './app/proveedores';
+import { rutaBase, urlDeLaApp } from './app/rutaBase';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const clave = import.meta.env.VITE_SUPABASE_CLAVE;
@@ -17,13 +18,14 @@ if (!url || !clave) {
   throw new Error('Faltan VITE_SUPABASE_URL y VITE_SUPABASE_CLAVE. Cópialas desde .env.example a .env.');
 }
 
+const base = import.meta.env.BASE_URL;
 const datos = crearDatos(crearClienteTracker(url, clave, { persistirSesion: true }), {
-  urlApp: window.location.origin,
+  urlApp: urlDeLaApp(window.location.origin, base),
 });
 
 createRoot(document.getElementById('raiz')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={rutaBase(base)}>
       <Proveedores datos={datos}>
         <App />
       </Proveedores>
