@@ -33,20 +33,21 @@ language sql stable security definer
 set search_path = ''
 as $$
   select exists (select 1 from tracker.usuarios where id = auth.uid())
+    and coalesce(tracker.es_correo_permitido(auth.jwt() ->> 'email'), false)
 $$;
 
 create function tracker.es_admin() returns boolean
 language sql stable security definer
 set search_path = ''
 as $$
-  select exists (select 1 from tracker.usuarios where id = auth.uid() and es_admin)
+  select tracker.es_usuario() and exists (select 1 from tracker.usuarios where id = auth.uid() and es_admin)
 $$;
 
 create function tracker.rol_en_marca(marca uuid) returns text
 language sql stable security definer
 set search_path = ''
 as $$
-  select rol from tracker.membresias where usuario_id = auth.uid() and marca_id = marca
+  select rol from tracker.membresias where usuario_id = auth.uid() and marca_id = marca and tracker.es_usuario()
 $$;
 
 create function tracker.puede_ver_marca(marca uuid) returns boolean

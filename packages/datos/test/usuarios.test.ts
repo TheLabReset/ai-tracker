@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { crearDatos } from '../src/datos';
 import { ErrorDatos } from '../src/tipos';
 import { crearClienteTracker } from '../src/cliente';
+import { alta } from './ayudas/alta';
 import { clienteServicio, entorno } from './ayudas/entorno';
 import { usuarioDePrueba } from './ayudas/usuarios';
 
@@ -50,6 +51,27 @@ describe('usuarios y sesión', () => {
     const marcaId = marca.id;
     await servicio.from('membresias').insert({ usuario_id: otro.id, marca_id: marcaId, rol: 'lector' });
     await expect(u.datos.quitarMembresia(otro.id, marcaId)).rejects.toMatchObject({ codigo: 'sin_permiso' });
+  });
+  it('quien cambia su correo de auth fuera de los dominios deja de leer por la API', async () => {
+    const admin = await usuarioDePrueba({ admin: true });
+    const persona = await usuarioDePrueba();
+    const pid = await admin.datos.crearProyecto(await alta(admin.datos, { liderId: persona.id }));
+    const servicio = clienteServicio();
+    const { url, claveAnonima } = entorno();
+    const tablas = ['sectores', 'marcas', 'alias', 'motores', 'motores_historial', 'plantillas', 'usuarios', 'empresas', 'membresias', 'proyectos', 'proyecto_competidores', 'proyecto_motores', 'preguntas', 'bitacora'];
+    for (const u of [persona, admin]) {
+      const fuera = `fuera-${crypto.randomUUID()}@gmail.com`;
+      const { error } = await servicio.auth.admin.updateUserById(u.id, { email: fuera, email_confirm: true, password: 'clave-fuera-123' });
+      expect(error).toBeNull();
+      const cliente = crearClienteTracker(url, claveAnonima);
+      expect((await cliente.auth.signInWithPassword({ email: fuera, password: 'clave-fuera-123' })).error).toBeNull();
+      expect((await cliente.from('proyectos').select('id').eq('id', pid)).data).toEqual([]);
+      for (const tabla of tablas) {
+        const r = await cliente.from(tabla).select('*').limit(1);
+        expect({ tabla, error: r.error, filas: r.data }).toEqual({ tabla, error: null, filas: [] });
+      }
+      expect((await cliente.from('sectores').insert({ nombre: `Sector ${crypto.randomUUID()}`, categoria: 'prueba' })).error).not.toBeNull();
+    }
   });
   it('crearClave sin sesión da datos_invalidos con texto en español', async () => {
     const { url, claveAnonima } = entorno();

@@ -91,7 +91,7 @@ language sql stable security definer
 set search_path = ''
 as $$
   select tracker.es_admin()
-    or exists (select 1 from tracker.membresias where usuario_id = auth.uid() and rol = 'lider')
+    or (tracker.es_usuario() and exists (select 1 from tracker.membresias where usuario_id = auth.uid() and rol = 'lider'))
 $$;
 
 create function tracker.crear_marca(sector uuid, datos jsonb) returns uuid
